@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MPC Prep Command Center</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Technical scrollbars */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #111827;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 2px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #4b5563;
+    }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen font-mono selection:bg-cyan-500 selection:text-black">
+
+  <!-- PROFILE SELECTION OVERLAY (Modal) -->
+  <div id="profile-modal" class="fixed inset-0 bg-zinc-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="border border-zinc-800 bg-zinc-900 max-w-md w-full p-6 rounded shadow-2xl relative">
+      <div class="flex items-center gap-2 mb-4 border-b border-zinc-800 pb-3">
+        <div class="p-1.5 bg-cyan-500/10 border border-cyan-500/30 rounded text-cyan-400">
+          <i data-lucide="user-check" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-100">Profile Authentication</h2>
+          <p class="text-[10px] text-zinc-500">Access your local local-scoped partition</p>
+        </div>
+      </div>
+      
+      <form onsubmit="handleProfileSelection(event)" class="space-y-4">
+        <div>
+          <label for="profile-input" class="block text-[10px] uppercase font-bold text-zinc-500 mb-2">Username Profile</label>
+          <input type="text" id="profile-input" required placeholder="e.g., Arjun_JEE" pattern="^[a-zA-Z0-9_\-]+$" title="Alphanumeric, underscores, or hyphens only." class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 text-xs transition">
+          <p class="text-[9px] text-zinc-500 mt-1.5 leading-normal">
+            Data is securely compartmentalized under this handle on your browser. Enter an existing profile handle or type a new one to register.
+          </p>
+        </div>
+        <button type="submit" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold uppercase rounded text-xs transition">
+          Load Partition
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Unified Technical Header -->
+  <header class="border-b border-zinc-800 bg-zinc-950/90 sticky top-0 z-40 text-xs">
+    <!-- Upper Strip: Brand & Profile Control -->
+    <div class="border-b border-zinc-900 bg-zinc-900/40">
+      <div class="max-w-7xl mx-auto px-4 py-2.5 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+        <!-- Logo & Status -->
+        <div class="flex items-center gap-2">
+          <span class="text-cyan-400"><i data-lucide="terminal" class="w-4 h-4"></i></span>
+          <span class="font-bold tracking-widest uppercase text-zinc-200">MPC_PREP_COMMAND</span>
+          <span class="text-[9px] text-zinc-500 px-1 border border-zinc-800 bg-zinc-950 rounded">V3.0</span>
+        </div>
+        <!-- Profile Quick Action Area -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 text-zinc-400">
+            <i data-lucide="user" class="w-3.5 h-3.5 text-cyan-500/80"></i>
+            <span class="text-[10px] text-zinc-500 uppercase">User:</span>
+            <span id="active-user-display" class="font-bold text-cyan-400">GUEST</span>
+          </div>
+          <span class="text-zinc-800 font-bold">|</span>
+          <!-- Control Buttons -->
+          <button onclick="switchProfile()" class="text-zinc-500 hover:text-cyan-400 transition" title="Switch Profile">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+          <button onclick="resetAllData()" class="text-zinc-500 hover:text-red-400 transition ml-1" title="Wipe Session Data">
+            <i data-lucide="power" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lower Strip: Navigation & Session Indicators -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col md:flex-row items-center justify-between gap-3">
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 custom-scrollbar">
+        <a href="../index.html" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
+          <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i> Portal Home
+        </a>
+        <a href="./command-center.html" class="text-cyan-400 border-b border-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5 font-bold">
+          <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Command Center
+        </a>
+        <a href="./mock-analyzer.html" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
+          <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Mock Analyzer
+        </a>
+        <a href="https://sandeshbanala0811.github.io/jee-formula-vault/index.html" target="_blank" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
+          <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Formula Vault
+        </a>
+      </nav>
+
+      <!-- Dynamic Micro-Metrics -->
+      <div class="flex items-center gap-4 text-[10px] text-zinc-500 font-semibold uppercase tracking-wider shrink-0 w-full md:w-auto justify-end border-t border-zinc-900/50 md:border-none pt-2 md:pt-0">
+        <span class="flex items-center gap-1 bg-zinc-950 px-2 py-1 rounded border border-zinc-900">
+          Total Time: <span id="total-hours-header" class="font-bold text-cyan-400">0.0 HRS</span>
+        </span>
+        <span class="flex items-center gap-1 bg-zinc-950 px-2 py-1 rounded border border-zinc-900">
+          Distractions: <span id="total-distractions-header" class="font-bold text-amber-400">0</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Banner -->
+  <div id="toast-container" class="fixed top-16 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Primary Workspace -->
+  <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- LEFT WORKSPACE: Focus Timer & Unified Logger (Spans 5 Cols) -->
+      <div class="lg:col-span-5 space-y-6">
+        
+        <!-- Interactive Focus Console -->
+        <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded relative overflow-hidden">
+          <div class="flex justify-between items-center mb-4 border-b border-zinc-800 pb-2">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> 01 // Focus Monitor
+            </h2>
+            <span id="timer-status" class="text-[10px] font-bold text-zinc-500 bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded uppercase">
+              Standby
+            </span>
+          </div>
+
+          <div class="flex items-center justify-between py-2">
+            <div>
+              <div id="timer-display" class="text-4xl font-bold tracking-tight text-zinc-100 font-mono">00:00</div>
+              <p class="text-[10px] text-zinc-500 uppercase tracking-wider mt-1">Elapsed Focus Time</p>
+            </div>
+            
+            <!-- Distraction Monitor Tally -->
+            <div class="text-right">
+              <button onclick="incrementDistractions()" class="active:scale-95 transition bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-zinc-400 px-3 py-2 rounded text-[11px] flex items-center gap-1.5 font-medium">
+                <i data-lucide="bell-ring" class="w-3.5 h-3.5 text-amber-500"></i>
+                Distractions
+                <span id="distraction-counter-badge" class="bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold text-xs px-2 py-0.5 rounded">0</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Timer Action Buttons -->
+          <div class="grid grid-cols-3 gap-2 mt-4">
+            <button id="btn-timer-primary" onclick="toggleTimer()" class="py-2 px-3 bg-cyan-600 hover:bg-cyan-500 text-black font-bold rounded text-xs uppercase flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="play" class="w-3.5 h-3.5" id="timer-icon-primary"></i>
+              <span id="timer-text-primary">Start</span>
+            </button>
+            <button onclick="resetTimer()" class="py-2 px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold rounded text-xs uppercase flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="square" class="w-3.5 h-3.5"></i>
+              Reset
+            </button>
+            <button onclick="finishAndTransferSession()" class="py-2 px-1 bg-zinc-950 border border-zinc-800 hover:border-cyan-500/50 text-cyan-400 font-bold rounded text-[10px] uppercase flex items-center justify-center gap-1 transition">
+              <i data-lucide="corner-down-right" class="w-3 h-3"></i>
+              Sync Time
+            </button>
+          </div>
+        </div>
+
+        <!-- Integrated Data Logger Form -->
+        <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded relative">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mb-4 border-b border-zinc-800 pb-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> 02 // Unified Entry Form
+          </h2>
+
+          <form id="logger-form" onsubmit="handleLogSubmission(event)" class="space-y-4 text-xs">
+            <!-- Subject Selector -->
+            <div>
+              <label for="subject-select" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Subject Selection</label>
+              <select id="subject-select" onchange="populateChapters()" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
+                <option value="" disabled selected>Select Subject</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Physics">Physics</option>
+                <option value="Chemistry">Chemistry</option>
+              </select>
+            </div>
+
+            <!-- Chapter Selector -->
+            <div>
+              <label for="chapter-select" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Chapter Selection</label>
+              <select id="chapter-select" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 disabled:opacity-40 transition" disabled>
+                <option value="" disabled selected>Select Subject first</option>
+              </select>
+            </div>
+
+            <!-- Durations & Distractions Inline Row -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="log-time" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Logged Time (Mins)</label>
+                <input type="number" id="log-time" required min="1" max="1440" placeholder="e.g., 45" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
+              </div>
+              <div>
+                <label for="log-distractions" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Distractions</label>
+                <input type="number" id="log-distractions" min="0" value="0" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
+              </div>
+            </div>
+
+            <!-- Difficulty Level Pills -->
+            <div>
+              <label class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Subjective Difficulty</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button type="button" onclick="setDifficultyPill('Easy')" id="pill-Easy" class="py-2 px-1 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-emerald-500/40 rounded transition">
+                  Easy
+                </button>
+                <button type="button" onclick="setDifficultyPill('Medium')" id="pill-Medium" class="py-2 px-1 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-amber-500/40 rounded transition">
+                  Medium
+                </button>
+                <button type="button" onclick="setDifficultyPill('Hard')" id="pill-Hard" class="py-2 px-1 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-red-500/40 rounded transition">
+                  Hard
+                </button>
+              </div>
+              <input type="hidden" id="selected-difficulty" value="" required>
+            </div>
+
+            <!-- Target Study Status Checklist -->
+            <div>
+              <label class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Target Work Pillars Completed</label>
+              <div class="grid grid-cols-3 gap-2">
+                <label class="flex items-center justify-between p-2 rounded border border-zinc-800 bg-zinc-950/45 hover:bg-zinc-900 cursor-pointer transition">
+                  <span class="text-[10px]">Theory</span>
+                  <input type="checkbox" id="pillar-theory" class="rounded bg-zinc-950 border-zinc-800 text-cyan-500 focus:ring-0">
+                </label>
+                <label class="flex items-center justify-between p-2 rounded border border-zinc-800 bg-zinc-950/45 hover:bg-zinc-900 cursor-pointer transition">
+                  <span class="text-[10px]">DPPs</span>
+                  <input type="checkbox" id="pillar-dpps" class="rounded bg-zinc-950 border-zinc-800 text-cyan-500 focus:ring-0">
+                </label>
+                <label class="flex items-center justify-between p-2 rounded border border-zinc-800 bg-zinc-950/45 hover:bg-zinc-900 cursor-pointer transition">
+                  <span class="text-[10px]">PYQs</span>
+                  <input type="checkbox" id="pillar-pyqs" class="rounded bg-zinc-950 border-zinc-800 text-cyan-500 focus:ring-0">
+                </label>
+              </div>
+            </div>
+
+            <!-- Focus Rating Slider -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label for="focus-rating" class="block text-[10px] uppercase font-bold text-zinc-500">Focus Index Rating</label>
+                <span id="focus-rating-display" class="text-[10px] font-bold text-cyan-400">3 // Medium Focus</span>
+              </div>
+              <input type="range" id="focus-rating" min="1" max="5" value="3" oninput="updateFocusRatingDisplay(this.value)" class="w-full accent-cyan-500 bg-zinc-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+            </div>
+
+            <!-- Submit Logs Button -->
+            <button type="submit" class="w-full py-2.5 bg-zinc-100 hover:bg-zinc-200 text-black font-bold uppercase rounded flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              Add Record to Logs
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- RIGHT WORKSPACE: Performance Analytics & Consolidated Multi-Tab Module (Spans 7 Cols) -->
+      <div class="lg:col-span-7 space-y-6">
+        
+        <!-- Subject Hours Progress Visualization -->
+        <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mb-4 border-b border-zinc-800 pb-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> 03 // Cumulative Subject Hours
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Math -->
+            <div class="bg-zinc-950/50 p-3 rounded border border-zinc-800/60">
+              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
+                <span>MATHEMATICS</span>
+                <span id="math-hours-txt" class="text-cyan-400">0.0h</span>
+              </div>
+              <div class="w-full bg-zinc-900 h-1 rounded-full overflow-hidden">
+                <div id="math-hours-bar" class="bg-cyan-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+
+            <!-- Physics -->
+            <div class="bg-zinc-950/50 p-3 rounded border border-zinc-800/60">
+              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
+                <span>PHYSICS</span>
+                <span id="physics-hours-txt" class="text-amber-500">0.0h</span>
+              </div>
+              <div class="w-full bg-zinc-900 h-1 rounded-full overflow-hidden">
+                <div id="math-hours-bar" class="bg-amber-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+
+            <!-- Chemistry -->
+            <div class="bg-zinc-950/50 p-3 rounded border border-zinc-800/60">
+              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
+                <span>CHEMISTRY</span>
+                <span id="chemistry-hours-txt" class="text-emerald-500">0.0h</span>
+              </div>
+              <div class="w-full bg-zinc-900 h-1 rounded-full overflow-hidden">
+                <div id="chemistry-hours-bar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Multi-Tab workspace containing Dynamic Matrix, Readiness & Audits -->
+        <div class="border border-zinc-800 bg-zinc-900/40 rounded flex flex-col min-h-[445px]">
+          
+          <!-- Tab Switchers -->
+          <div class="flex border-b border-zinc-800 bg-zinc-950/60 text-xs text-zinc-400">
+            <button onclick="setActiveTab('tab-matrix')" id="btn-tab-matrix" class="flex-1 py-3 text-center border-r border-zinc-800 font-bold uppercase tracking-wider text-cyan-400 border-b-2 border-b-cyan-500 bg-zinc-900/30 transition">
+              Difficulty Board
+            </button>
+            <button onclick="setActiveTab('tab-readiness')" id="btn-tab-readiness" class="flex-1 py-3 text-center border-r border-zinc-800 font-bold uppercase tracking-wider transition">
+              Syllabus Readiness
+            </button>
+            <button onclick="setActiveTab('tab-logs')" id="btn-tab-logs" class="flex-1 py-3 text-center font-bold uppercase tracking-wider transition">
+              Audit Feed
+            </button>
+          </div>
+
+          <!-- Tab Content Views -->
+          <div class="p-5 flex-1 flex flex-col justify-between">
+            
+            <!-- TAB 1: Difficulty Matrix -->
+            <div id="tab-matrix" class="tab-view space-y-4">
+              <p class="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-1">Dynamic Chapter Difficulty Matrix</p>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <!-- Easy Column -->
+                <div class="bg-zinc-950/40 border border-zinc-800 p-2.5 rounded min-h-[250px] flex flex-col">
+                  <span class="text-[10px] font-bold text-emerald-400 border-b border-zinc-800 pb-1 mb-2 block uppercase flex justify-between">
+                    <span>Easy Lanes</span>
+                    <span id="count-lane-easy" class="text-zinc-500">0</span>
+                  </span>
+                  <div id="lane-easy-list" class="space-y-1.5 flex-1 overflow-y-auto max-h-[200px] custom-scrollbar"></div>
+                </div>
+
+                <!-- Medium Column -->
+                <div class="bg-zinc-950/40 border border-zinc-800 p-2.5 rounded min-h-[250px] flex flex-col">
+                  <span class="text-[10px] font-bold text-amber-500 border-b border-zinc-800 pb-1 mb-2 block uppercase flex justify-between">
+                    <span>Medium Lanes</span>
+                    <span id="count-lane-medium" class="text-zinc-500">0</span>
+                  </span>
+                  <div id="lane-medium-list" class="space-y-1.5 flex-1 overflow-y-auto max-h-[200px] custom-scrollbar"></div>
+                </div>
+
+                <!-- Hard Column -->
+                <div class="bg-zinc-950/40 border border-zinc-800 p-2.5 rounded min-h-[250px] flex flex-col">
+                  <span class="text-[10px] font-bold text-red-400 border-b border-zinc-800 pb-1 mb-2 block uppercase flex justify-between">
+                    <span>Hard Lanes</span>
+                    <span id="count-lane-hard" class="text-zinc-500">0</span>
+                  </span>
+                  <div id="lane-hard-list" class="space-y-1.5 flex-1 overflow-y-auto max-h-[200px] custom-scrollbar"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: Syllabus Revision Readiness -->
+            <div id="tab-readiness" class="tab-view hidden space-y-3">
+              <p class="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-1">Syllabus Completion Index</p>
+              <div id="readiness-list" class="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+                <!-- Dynamically filled on updates -->
+              </div>
+            </div>
+
+            <!-- TAB 3: Recent Activity Logs -->
+            <div id="tab-logs" class="tab-view hidden space-y-3">
+              <p class="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-1">Historical Audit History Feed</p>
+              <div id="log-feed" class="space-y-2.5 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+                <!-- Log feed list -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Technical Footer -->
+  <footer class="text-center text-[10px] tracking-widest text-zinc-600 border-t border-zinc-900 mt-12 py-6 uppercase">
+    MPC_COMMAND_CONSOLE_RECONFIGURED // SECURE_STORAGE_STATE_ON
+  </footer>
+
+  <script>
+    // Master Syllabus Dictionary
+    const SYLLABUS_DATA = {
+      "Mathematics": [
+        "Sets, Relations & Functions",
+        "Trigonometric Ratios & Transformations",
+        "Trigonometric Equations",
+        "Inverse Trigonometric Functions",
+        "Hyperbolic Functions",
+        "Properties of Triangles & Heights & Distances",
+        "Complex Numbers & De Moivre’s Theorem",
+        "Quadratic Equations & Expressions",
+        "Theory of Equations",
+        "Linear Inequalities",
+        "Permutations & Combinations",
+        "Mathematical Induction",
+        "Binomial Theorem",
+        "Sequences and Series (AP, GP, HP)",
+        "Partial Fractions",
+        "Matrices & Determinants",
+        "Addition of Vectors",
+        "Product of Vectors",
+        "Locus & Transformation of Axes",
+        "The Straight Line",
+        "Pair of Straight Lines",
+        "Circle & System of Circles",
+        "Parabola",
+        "Ellipse",
+        "Hyperbola",
+        "Three-Dimensional Geometry (Coordinates, Lines & Planes)",
+        "Direction Cosines & Direction Ratios",
+        "Limits, Continuity & Differentiability",
+        "Differentiation (Methods of Differentiation)",
+        "Applications of Derivatives (Tangents, Monotonicity, Maxima-Minima)",
+        "Indefinite Integration",
+        "Definite Integrals & Area Under Curves",
+        "Differential Equations",
+        "Measures of Dispersion & Statistics",
+        "Probability & Random Variables",
+        "Mathematical Reasoning"
+      ],
+      "Physics": [
+        "Physical World & Units and Measurements",
+        "Motion in a Straight Line (Kinematics 1D)",
+        "Motion in a Plane (Vectors, Projectile & Circular)",
+        "Laws of Motion & Friction",
+        "Work, Energy and Power",
+        "System of Particles and Centre of Mass",
+        "Rotational Motion & Rigid Body Dynamics",
+        "Gravitation",
+        "Mechanical Properties of Solids (Elasticity)",
+        "Mechanical Properties of Fluids (Hydrostatics, Viscosity & Surface Tension)",
+        "Thermal Properties of Matter & Calorimetry",
+        "Thermodynamics",
+        "Kinetic Theory of Gases",
+        "Oscillations (Simple Harmonic Motion)",
+        "Waves & Sound Waves",
+        "Electric Charges and Fields (Electrostatics I)",
+        "Electrostatic Potential and Capacitance (Electrostatics II)",
+        "Current Electricity",
+        "Moving Charges and Magnetism (Magnetic Effects of Current)",
+        "Magnetism and Matter",
+        "Electromagnetic Induction (EMI)",
+        "Alternating Current (AC)",
+        "Electromagnetic Waves",
+        "Ray Optics and Optical Instruments",
+        "Wave Optics (Interference, Diffraction & Polarization)",
+        "Dual Nature of Radiation and Matter",
+        "Atoms & Atomic Structure",
+        "Nuclei & Nuclear Physics",
+        "Semiconductor Electronics & Logic Gates",
+        "Communication Systems",
+        "Experimental Physics & Error Analysis"
+      ],
+      "Chemistry": [
+        "Some Basic Concepts of Chemistry (Mole Concept & Stoichiometry)",
+        "Structure of Atom",
+        "Classification of Elements and Periodicity",
+        "Chemical Bonding and Molecular Structure",
+        "States of Matter: Gases and Liquids",
+        "Chemical Thermodynamics & Energetics",
+        "Chemical Equilibrium",
+        "Ionic Equilibrium & Acid-Bases",
+        "Redox Reactions & Oxidation Numbers",
+        "Hydrogen and its Compounds",
+        "s-Block Elements (Alkali & Alkaline Earth Metals)",
+        "p-Block Elements: Group 13 & 14 (Boron & Carbon Families)",
+        "Environmental Chemistry",
+        "General Organic Chemistry (GOC & Isomerism)",
+        "Hydrocarbons (Alkanes, Alkenes, Alkynes & Arenes)",
+        "Solid State",
+        "Solutions & Colligative Properties",
+        "Electrochemistry",
+        "Chemical Kinetics",
+        "Surface Chemistry",
+        "General Principles and Isolation of Elements (Metallurgy)",
+        "p-Block Elements: Group 15, 16, 17 & 18",
+        "d and f Block Elements",
+        "Coordination Compounds & Organometallics",
+        "Haloalkanes and Haloarenes",
+        "Alcohols, Phenols and Ethers",
+        "Aldehydes, Kidneys and Carboxylic Acids",
+        "Organic Compounds Containing Nitrogen (Amines & Diazonium Salts)",
+        "Biomolecules",
+        "Polymers",
+        "Chemistry in Everyday Life",
+        "Practical & Analytical Chemistry (Salt Analysis)"
+      ]
+    };
+
+    // Active Profile Handle State
+    let activeUser = localStorage.getItem('mpc_v3_user') || "";
+
+    // Local profile variables
+    let logs = [];
+    let chapterPillars = {};
+    let chapterDifficulty = {};
+
+    // Live Timer Controls State
+    let timerSeconds = 0;
+    let timerInterval = null;
+    let timerRunning = false;
+    let distractionsTally = 0;
+
+    let selectedDifficultyLevel = "";
+
+    const ratingDescriptions = {
+      1: "1 // Heavy Distractions / Fatigued",
+      2: "2 // Low Concentration",
+      3: "3 // Medium Focus",
+      4: "4 // High Attentive State",
+      5: "5 // Direct Flow State"
+    };
+
+    // Run on startup
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      verifyProfileSession();
+    });
+
+    // Check if profile handle is initialized
+    function verifyProfileSession() {
+      const modal = document.getElementById('profile-modal');
+      if (!activeUser) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+        document.getElementById('active-user-display').innerText = activeUser.toUpperCase();
+        loadUserProfileData();
+      }
+    }
+
+    // Load state tied specifically to active handle
+    function loadUserProfileData() {
+      logs = JSON.parse(localStorage.getItem(`mpc_v3_logs_${activeUser}`)) || [];
+      chapterPillars = JSON.parse(localStorage.getItem(`mpc_v3_pillars_${activeUser}`)) || {};
+      chapterDifficulty = JSON.parse(localStorage.getItem(`mpc_v3_difficulty_${activeUser}`)) || {};
+      refreshDashboard();
+    }
+
+    // Process profile submission from modal
+    function handleProfileSelection(e) {
+      e.preventDefault();
+      const rawUser = document.getElementById('profile-input').value.trim();
+      
+      // Enforce clean formatting constraints
+      if (/^[a-zA-Z0-9_\-]+$/.test(rawUser)) {
+        activeUser = rawUser;
+        localStorage.setItem('mpc_v3_user', activeUser);
+        verifyProfileSession();
+        showToast(`Profile "${activeUser}" loaded.`, "cyan");
+      } else {
+        showToast("Invalid handle characters used.", "rose");
+      }
+    }
+
+    // Logout / profile switcher callback
+    function switchProfile() {
+      if (timerRunning) toggleTimer();
+      resetTimer();
+      resetForm();
+      
+      activeUser = "";
+      localStorage.removeItem('mpc_v3_user');
+      document.getElementById('profile-input').value = "";
+      verifyProfileSession();
+    }
+
+    // Populate Dynamic Cascading Chapter Selector
+    function populateChapters() {
+      const subject = document.getElementById('subject-select').value;
+      const chapterSelect = document.getElementById('chapter-select');
+
+      chapterSelect.innerHTML = '<option value="" disabled selected>Select Chapter</option>';
+      
+      if (subject && SYLLABUS_DATA[subject]) {
+        SYLLABUS_DATA[subject].forEach(chapter => {
+          const option = document.createElement('option');
+          option.value = chapter;
+          option.textContent = chapter;
+          chapterSelect.appendChild(option);
+        });
+        chapterSelect.disabled = false;
+      } else {
+        chapterSelect.disabled = true;
+      }
+    }
+
+    // Set Active Difficulty Pill in the logger
+    function setDifficultyPill(level) {
+      selectedDifficultyLevel = level;
+      document.getElementById('selected-difficulty').value = level;
+
+      ['Easy', 'Medium', 'Hard'].forEach(lvl => {
+        const pill = document.getElementById(`pill-${lvl}`);
+        if (lvl === level) {
+          pill.className = "py-2 px-1 text-center border font-semibold text-black rounded transition " + 
+            (lvl === 'Easy' ? 'bg-emerald-400 border-emerald-400' : 
+             lvl === 'Medium' ? 'bg-amber-400 border-amber-400' : 
+             'bg-red-400 border-red-400');
+        } else {
+          pill.className = "py-2 px-1 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-" + 
+            (lvl === 'Easy' ? 'emerald' : lvl === 'Medium' ? 'amber' : 'red') + "-500/40 rounded transition";
+        }
+      });
+    }
+
+    // Slider text callback
+    function updateFocusRatingDisplay(val) {
+      document.getElementById('focus-rating-display').innerText = ratingDescriptions[val] || `${val} // Rated`;
+    }
+
+    /* Live Focus Timer controls */
+    function toggleTimer() {
+      const btnPrimary = document.getElementById('btn-timer-primary');
+      const textPrimary = document.getElementById('timer-text-primary');
+      const statusBadge = document.getElementById('timer-status');
+
+      if (!timerRunning) {
+        timerRunning = true;
+        btnPrimary.className = "py-2 px-3 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded text-xs uppercase flex items-center justify-center gap-1.5 transition";
+        textPrimary.innerText = "Pause";
+        statusBadge.innerText = "Active";
+        statusBadge.className = "text-[10px] font-bold text-cyan-400 bg-cyan-950/30 border border-cyan-500/30 px-2 py-0.5 rounded uppercase";
+
+        document.getElementById('timer-icon-primary').setAttribute('data-lucide', 'pause');
+        lucide.createIcons();
+
+        timerInterval = setInterval(() => {
+          timerSeconds++;
+          updateTimerDisplay();
+        }, 1000);
+      } else {
+        timerRunning = false;
+        btnPrimary.className = "py-2 px-3 bg-cyan-600 hover:bg-cyan-500 text-black font-bold rounded text-xs uppercase flex items-center justify-center gap-1.5 transition";
+        textPrimary.innerText = "Resume";
+        statusBadge.innerText = "Paused";
+        statusBadge.className = "text-[10px] font-bold text-zinc-400 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded uppercase";
+
+        document.getElementById('timer-icon-primary').setAttribute('data-lucide', 'play');
+        lucide.createIcons();
+
+        clearInterval(timerInterval);
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      timerSeconds = 0;
+      distractionsTally = 0;
+      updateTimerDisplay();
+      document.getElementById('distraction-counter-badge').innerText = '0';
+
+      const btnPrimary = document.getElementById('btn-timer-primary');
+      const textPrimary = document.getElementById('timer-text-primary');
+      const statusBadge = document.getElementById('timer-status');
+
+      btnPrimary.className = "py-2 px-3 bg-cyan-600 hover:bg-cyan-500 text-black font-bold rounded text-xs uppercase flex items-center justify-center gap-1.5 transition";
+      textPrimary.innerText = "Start";
+      statusBadge.innerText = "Standby";
+      statusBadge.className = "text-[10px] font-bold text-zinc-500 bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded uppercase";
+
+      document.getElementById('timer-icon-primary').setAttribute('data-lucide', 'play');
+      lucide.createIcons();
+    }
+
+    function incrementDistractions() {
+      distractionsTally++;
+      document.getElementById('distraction-counter-badge').innerText = distractionsTally;
+      showToast("Distraction incremented.", "amber");
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timerSeconds / 60);
+      const secs = timerSeconds % 60;
+      document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function finishAndTransferSession() {
+      if (timerSeconds < 5) {
+        showToast("Session duration too low to sync.", "rose");
+        return;
+      }
+      const rawMins = Math.max(1, Math.round(timerSeconds / 60));
+      document.getElementById('log-time').value = rawMins;
+      document.getElementById('log-distractions').value = distractionsTally;
+
+      showToast(`Synced ${rawMins}M and ${distractionsTally} distractions. Complete form entries to save.`, "cyan");
+      if (timerRunning) toggleTimer();
+    }
+
+    /* Core Logger Submissions */
+    function handleLogSubmission(e) {
+      e.preventDefault();
+
+      const subject = document.getElementById('subject-select').value;
+      const chapter = document.getElementById('chapter-select').value;
+      const duration = parseInt(document.getElementById('log-time').value, 10);
+      const distractions = parseInt(document.getElementById('log-distractions').value, 10) || 0;
+      const difficulty = document.getElementById('selected-difficulty').value;
+      const focusRating = parseInt(document.getElementById('focus-rating').value, 10);
+
+      if (!difficulty) {
+        showToast("Choose subjective difficulty level first.", "rose");
+        return;
+      }
+
+      const theory = document.getElementById('pillar-theory').checked;
+      const dpps = document.getElementById('pillar-dpps').checked;
+      const pyqs = document.getElementById('pillar-pyqs').checked;
+
+      // Track accumulative chapter milestone state
+      if (!chapterPillars[chapter]) {
+        chapterPillars[chapter] = { theory: false, dpps: false, pyqs: false };
+      }
+      if (theory) chapterPillars[chapter].theory = true;
+      if (dpps) chapterPillars[chapter].dpps = true;
+      if (pyqs) chapterPillars[chapter].pyqs = true;
+
+      chapterDifficulty[chapter] = difficulty;
+
+      const newRecord = {
+        id: 'rec_' + Date.now(),
+        timestamp: new Date().toISOString(),
+        subject,
+        chapter,
+        duration,
+        distractions,
+        difficulty,
+        focusRating,
+        pillars: { theory, dpps, pyqs }
+      };
+
+      logs.unshift(newRecord);
+      saveState();
+      refreshDashboard();
+      resetForm();
+      showToast("Activity recorded.", "emerald");
+    }
+
+    function resetForm() {
+      document.getElementById('logger-form').reset();
+      document.getElementById('chapter-select').disabled = true;
+      document.getElementById('chapter-select').innerHTML = '<option value="" disabled selected>Select Subject first</option>';
+      
+      selectedDifficultyLevel = "";
+      document.getElementById('selected-difficulty').value = "";
+      ['Easy', 'Medium', 'Hard'].forEach(lvl => {
+        document.getElementById(`pill-${lvl}`).className = "py-2 px-1 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-" + (lvl === 'Easy' ? 'emerald' : lvl === 'Medium' ? 'amber' : 'red') + "-500/40 rounded transition";
+      });
+      updateFocusRatingDisplay(3);
+    }
+
+    // Handle shift difficulty button actions in column lists
+    function shiftDifficultyLevel(chapter, currentLevel) {
+      const nextMap = { 'Easy': 'Medium', 'Medium': 'Hard', 'Hard': 'Easy' };
+      const nextLevel = nextMap[currentLevel];
+      chapterDifficulty[chapter] = nextLevel;
+      saveState();
+      refreshDashboard();
+      showToast(`Moved "${chapter}" difficulty index to ${nextLevel}.`, "cyan");
+    }
+
+    function deleteLogRecord(id) {
+      logs = logs.filter(log => log.id !== id);
+      saveState();
+      refreshDashboard();
+      showToast("Log entry cleared.", "rose");
+    }
+
+    function saveState() {
+      if (!activeUser) return;
+      localStorage.setItem(`mpc_v3_logs_${activeUser}`, JSON.stringify(logs));
+      localStorage.setItem(`mpc_v3_pillars_${activeUser}`, JSON.stringify(chapterPillars));
+      localStorage.setItem(`mpc_v3_difficulty_${activeUser}`, JSON.stringify(chapterDifficulty));
+    }
+
+    function resetAllData() {
+      if (!activeUser) return;
+      if (confirm(`Clear all logs and metrics registered under active profile "${activeUser}"?`)) {
+        localStorage.removeItem(`mpc_v3_logs_${activeUser}`);
+        localStorage.removeItem(`mpc_v3_pillars_${activeUser}`);
+        localStorage.removeItem(`mpc_v3_difficulty_${activeUser}`);
+        
+        logs = [];
+        chapterPillars = {};
+        chapterDifficulty = {};
+        resetTimer();
+        resetForm();
+        refreshDashboard();
+        showToast("Profile storage partition cleared.", "rose");
+      }
+    }
+
+    /* Tab Switcher Interface logic */
+    function setActiveTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+
+      const tabs = ['tab-matrix', 'tab-readiness', 'tab-logs'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`btn-${t}`);
+        if (t === tabId) {
+          btn.className = "flex-1 py-3 text-center border-r border-zinc-800 font-bold uppercase tracking-wider text-cyan-400 border-b-2 border-b-cyan-500 bg-zinc-900/30 transition";
+        } else {
+          btn.className = "flex-1 py-3 text-center border-r border-zinc-800 font-bold uppercase tracking-wider transition hover:bg-zinc-900/10";
+        }
+      });
+    }
+
+    /* Layout Updates & Dynamic Rendering */
+    function refreshDashboard() {
+      let totalMins = 0;
+      let totalDistractions = 0;
+      let subjectTimes = { "Mathematics": 0, "Physics": 0, "Chemistry": 0 };
+
+      logs.forEach(log => {
+        totalMins += log.duration;
+        totalDistractions += log.distractions;
+        if (subjectTimes[log.subject] !== undefined) {
+          subjectTimes[log.subject] += log.duration;
+        }
+      });
+
+      document.getElementById('total-hours-header').innerText = `${(totalMins / 60).toFixed(1)} HRS`;
+      document.getElementById('total-distractions-header').innerText = totalDistractions;
+
+      const peakMins = Math.max(...Object.values(subjectTimes), 1);
+      for (const sub in subjectTimes) {
+        const hours = (subjectTimes[sub] / 60).toFixed(1);
+        const subId = sub === "Mathematics" ? "math-hours" : sub === "Physics" ? "physics-hours" : "chemistry-hours";
+        document.getElementById(`${subId}-txt`).innerText = `${hours}h`;
+        const calculatedPercent = Math.min(100, Math.round((subjectTimes[sub] / peakMins) * 100));
+        document.getElementById(`${subId}-bar`).style.width = `${calculatedPercent}%`;
+      }
+
+      // Populate Difficulty Matrix Board lists
+      const easyCol = document.getElementById('lane-easy-list');
+      const mediumCol = document.getElementById('lane-medium-list');
+      const hardCol = document.getElementById('lane-hard-list');
+
+      easyCol.innerHTML = '';
+      mediumCol.innerHTML = '';
+      hardCol.innerHTML = '';
+
+      let cEasy = 0, cMedium = 0, cHard = 0;
+
+      Object.keys(chapterDifficulty).forEach(chap => {
+        const diff = chapterDifficulty[chap];
+        let parentSub = "Unknown";
+        for (const sub in SYLLABUS_DATA) {
+          if (SYLLABUS_DATA[sub].includes(chap)) {
+            parentSub = sub;
+            break;
+          }
+        }
+
+        const badgeStyle = parentSub === "Mathematics" ? "text-cyan-400" : parentSub === "Physics" ? "text-amber-500" : "text-emerald-400";
+
+        const card = document.createElement('div');
+        card.className = "p-2 bg-zinc-950 border border-zinc-800/80 rounded flex flex-col gap-1";
+        card.innerHTML = `
+          <span class="text-[10px] text-zinc-300 font-bold truncate leading-snug" title="${chap}">${chap}</span>
+          <div class="flex items-center justify-between text-[8px] font-bold">
+            <span class="${badgeStyle}">${parentSub.toUpperCase()}</span>
+            <button onclick="shiftDifficultyLevel('${chap}', '${diff}')" class="text-zinc-600 hover:text-cyan-400 transition" title="Change difficulty classification">SHIFT</button>
+          </div>
+        `;
+
+        if (diff === 'Easy') {
+          easyCol.appendChild(card);
+          cEasy++;
+        } else if (diff === 'Medium') {
+          mediumCol.appendChild(card);
+          cMedium++;
+        } else if (diff === 'Hard') {
+          hardCol.appendChild(card);
+          cHard++;
+        }
+      });
+
+      document.getElementById('count-lane-easy').innerText = cEasy;
+      document.getElementById('count-lane-medium').innerText = cMedium;
+      document.getElementById('count-lane-hard').innerText = cHard;
+
+      if (cEasy === 0) easyCol.innerHTML = '<span class="text-[9px] text-zinc-600 text-center block py-4">No Chapters</span>';
+      if (cMedium === 0) mediumCol.innerHTML = '<span class="text-[9px] text-zinc-600 text-center block py-4">No Chapters</span>';
+      if (cHard === 0) hardCol.innerHTML = '<span class="text-[9px] text-zinc-600 text-center block py-4">No Chapters</span>';
+
+      // Populate Revision Readiness list
+      const readinessList = document.getElementById('readiness-list');
+      const activeChapters = Object.keys(chapterPillars);
+
+      if (activeChapters.length === 0) {
+        readinessList.innerHTML = '<p class="text-[10px] text-zinc-600 text-center py-12">Submit logs to evaluate chapter revision status.</p>';
+      } else {
+        readinessList.innerHTML = '';
+        activeChapters.forEach(chap => {
+          const metrics = chapterPillars[chap];
+          let parentSub = "Unknown";
+          for (const sub in SYLLABUS_DATA) {
+            if (SYLLABUS_DATA[sub].includes(chap)) {
+              parentSub = sub;
+              break;
+            }
+          }
+
+          let score = 0;
+          if (metrics.theory) score++;
+          if (metrics.dpps) score++;
+          if (metrics.pyqs) score++;
+          const scorePercent = Math.round((score / 3) * 100);
+
+          const tBadge = metrics.theory ? "bg-emerald-950 text-emerald-400 border-emerald-500/20" : "bg-zinc-950 text-zinc-600 border-zinc-900";
+          const dBadge = metrics.dpps ? "bg-emerald-950 text-emerald-400 border-emerald-500/20" : "bg-zinc-950 text-zinc-600 border-zinc-900";
+          const pBadge = metrics.pyqs ? "bg-emerald-950 text-emerald-400 border-emerald-500/20" : "bg-zinc-950 text-zinc-600 border-zinc-900";
+
+          const subBorder = parentSub === "Mathematics" ? "border-l-cyan-500" : parentSub === "Physics" ? "border-l-amber-500" : "border-l-emerald-500";
+
+          const el = document.createElement('div');
+          el.className = `p-2 bg-zinc-950/60 border border-zinc-800 rounded flex justify-between items-center border-l-2 ${subBorder}`;
+          el.innerHTML = `
+            <div class="min-w-0 flex-1">
+              <span class="text-[10px] font-bold text-zinc-300 block truncate" title="${chap}">${chap}</span>
+              <span class="text-[8px] text-zinc-500 uppercase tracking-wider">${parentSub}</span>
+            </div>
+            <div class="flex items-center gap-3 ml-2">
+              <div class="flex gap-1 text-[8px] font-bold">
+                <span class="px-1.5 py-0.5 rounded border ${tBadge}">T</span>
+                <span class="px-1.5 py-0.5 rounded border ${dBadge}">D</span>
+                <span class="px-1.5 py-0.5 rounded border ${pBadge}">P</span>
+              </div>
+              <span class="text-[9px] font-bold text-cyan-400 w-10 text-right">${scorePercent}%</span>
+            </div>
+          `;
+          readinessList.appendChild(el);
+        });
+      }
+
+      // Populate Audit Logs Feed
+      const logFeed = document.getElementById('log-feed');
+      if (logs.length === 0) {
+        logFeed.innerHTML = '<p class="text-[10px] text-zinc-600 text-center py-12">No activity records in current archive.</p>';
+      } else {
+        logFeed.innerHTML = '';
+        logs.forEach(record => {
+          const formattedTime = new Date(record.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const diffBorder = record.difficulty === 'Easy' ? 'border-l-emerald-500' : record.difficulty === 'Medium' ? 'border-l-amber-500' : 'border-l-red-500';
+
+          const container = document.createElement('div');
+          container.className = `p-2.5 bg-zinc-950/80 border border-zinc-800/80 rounded border-l-2 ${diffBorder} flex justify-between items-center gap-3`;
+          container.innerHTML = `
+            <div class="min-w-0 flex-1">
+              <span class="text-[10px] font-bold text-zinc-300 truncate block">${record.chapter}</span>
+              <div class="flex items-center gap-2 text-[8px] text-zinc-500 uppercase font-semibold mt-0.5">
+                <span>⏳ ${record.duration} mins</span>
+                <span>🔔 ${record.distractions} dst.</span>
+                <span>⚡ Focus: ${record.focusRating}/5</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[8px] text-zinc-600">${formattedTime}</span>
+              <button onclick="deleteLogRecord('${record.id}')" class="text-zinc-600 hover:text-red-400 p-1 transition" title="Delete record">
+                <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          `;
+          logFeed.appendChild(container);
+        });
+      }
+
+      lucide.createIcons();
+    }
+
+    /* Notification Toasts */
+    function showToast(message, type = "cyan") {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+
+      const styleClasses = {
+        cyan: "bg-zinc-900 border-cyan-500/40 text-cyan-200",
+        emerald: "bg-zinc-900 border-emerald-500/40 text-emerald-200",
+        rose: "bg-zinc-900 border-red-500/40 text-red-200",
+        amber: "bg-zinc-900 border-amber-500/40 text-amber-200"
+      };
+
+      toast.className = `flex items-center justify-between gap-3 px-3 py-2.5 border rounded shadow-md pointer-events-auto transition-all duration-300 max-w-xs animate-slide-in ${styleClasses[type] || styleClasses.cyan}`;
+      toast.innerHTML = `
+        <span class="text-[10px] font-semibold leading-relaxed">${message}</span>
+        <button onclick="this.parentElement.remove()" class="text-zinc-500 hover:text-zinc-100 p-0.5">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      `;
+
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.className += " opacity-0 translate-x-2";
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+  </script>
+
+  <style>
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .animate-slide-in {
+      animation: slideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</body>
+</html>
