@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JEE MPC Mock Analyzer & Revision Guardian</title>
+  <title>MPC Prep Command Center</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
@@ -11,7 +11,7 @@
   <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* Custom technical scrollbar styling */
+    /* Technical scrollbars */
     .custom-scrollbar::-webkit-scrollbar {
       width: 4px;
       height: 4px;
@@ -30,25 +30,25 @@
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen font-mono selection:bg-cyan-500 selection:text-black">
 
-  <!-- PROFILE GATEWAY OVERLAY -->
+  <!-- PROFILE SELECTION OVERLAY (Modal) -->
   <div id="profile-modal" class="fixed inset-0 bg-zinc-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-    <div class="border border-zinc-800 bg-zinc-900 max-w-md w-full p-6 rounded shadow-2xl">
+    <div class="border border-zinc-800 bg-zinc-900 max-w-md w-full p-6 rounded shadow-2xl relative">
       <div class="flex items-center gap-2 mb-4 border-b border-zinc-800 pb-3">
         <div class="p-1.5 bg-cyan-500/10 border border-cyan-500/30 rounded text-cyan-400">
           <i data-lucide="user-check" class="w-5 h-5"></i>
         </div>
         <div>
-          <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-100">Guardian Authentication</h2>
-          <p class="text-[10px] text-zinc-500">Access your local or cloud database partition</p>
+          <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-100">Profile Authentication</h2>
+          <p class="text-[10px] text-zinc-500">Access your local local-scoped partition</p>
         </div>
       </div>
       
       <!-- Database Mode Selector -->
       <div class="grid grid-cols-2 gap-2 mb-4">
-        <button onclick="toggleLoginMode('local')" id="btn-mode-local" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
+        <button type="button" onclick="toggleLoginMode('local')" id="btn-mode-local" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
           Browser Storage
         </button>
-        <button onclick="toggleLoginMode('cloud')" id="btn-mode-cloud" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-zinc-800 bg-zinc-950/45 text-zinc-500 hover:border-zinc-700">
+        <button type="button" onclick="toggleLoginMode('cloud')" id="btn-mode-cloud" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-zinc-800 bg-zinc-950/45 text-zinc-500 hover:border-zinc-700">
           Supabase Cloud
         </button>
       </div>
@@ -73,45 +73,68 @@
         </div>
 
         <button type="submit" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold uppercase rounded text-xs transition">
-          Access Registry
+          Load Partition
         </button>
       </form>
     </div>
   </div>
 
-  <!-- Header -->
-  <header class="border-b border-zinc-800 bg-zinc-900/80 sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-      
-      <!-- Brand -->
-      <div class="flex items-center gap-2.5">
-        <div class="p-1.5 bg-cyan-500/10 border border-cyan-500/30 rounded text-cyan-400">
-          <i data-lucide="shield-alert" class="w-5 h-5"></i>
+  <!-- Unified Technical Header -->
+  <header class="border-b border-zinc-800 bg-zinc-950/90 sticky top-0 z-40 text-xs">
+    <!-- Upper Strip: Brand & Profile Control -->
+    <div class="border-b border-zinc-900 bg-zinc-900/40">
+      <div class="max-w-7xl mx-auto px-4 py-2.5 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+        <!-- Logo & Status -->
+        <div class="flex items-center gap-2">
+          <span class="text-cyan-400"><i data-lucide="terminal" class="w-4 h-4"></i></span>
+          <span class="font-bold tracking-widest uppercase text-zinc-200">MPC_PREP_COMMAND</span>
+          <span id="app-mode-badge" class="text-[9px] text-cyan-400 px-1 border border-cyan-500/20 bg-cyan-950/20 rounded">OFFLINE</span>
         </div>
-        <div>
-          <h1 class="text-sm font-bold tracking-widest uppercase text-zinc-100 flex items-center gap-2">
-            MOCK_ANALYZER // <span id="app-mode-badge" class="text-cyan-400 text-xs">OFFLINE</span>
-          </h1>
-          <p class="text-[10px] text-zinc-500">JEE Revision Decay & Analytics Suite</p>
+        <!-- Profile Quick Action Area -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 text-zinc-400">
+            <i data-lucide="user" class="w-3.5 h-3.5 text-cyan-500/80"></i>
+            <span class="text-[10px] text-zinc-500 uppercase">User:</span>
+            <span id="active-user-display" class="font-bold text-cyan-400">GUEST</span>
+          </div>
+          <span class="text-zinc-800 font-bold">|</span>
+          <!-- Control Buttons -->
+          <button onclick="switchProfile()" class="text-zinc-500 hover:text-cyan-400 transition" title="Switch Profile">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+          <button onclick="resetAllData()" class="text-zinc-500 hover:text-red-400 transition ml-1" title="Wipe Session Data">
+            <i data-lucide="power" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
       </div>
-      
-      <!-- Profile & Global Stats -->
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="border border-cyan-500/20 bg-cyan-950/20 px-3 py-1.5 rounded flex items-center gap-2">
-          <i data-lucide="user" class="w-3.5 h-3.5 text-cyan-400"></i>
-          <span id="active-user-display" class="text-xs font-bold text-cyan-400">GUEST</span>
-        </div>
-        <button onclick="switchProfile()" class="p-1.5 text-zinc-500 hover:text-cyan-400 hover:bg-zinc-900 rounded border border-zinc-800 transition" title="Change Profile">
-          <i data-lucide="log-out" class="w-4 h-4"></i>
-        </button>
-        <div class="border border-zinc-800 bg-zinc-950 px-3 py-1.5 rounded flex items-center gap-2">
-          <span class="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Backlogs</span>
-          <span id="global-backlog-count" class="text-xs font-bold text-red-400">0</span>
-        </div>
-        <button onclick="resetAllData()" class="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-zinc-900 rounded border border-zinc-800 transition" title="Wipe Data partition">
-          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-        </button>
+    </div>
+
+    <!-- Lower Strip: Navigation & Session Indicators -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col md:flex-row items-center justify-between gap-3">
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 custom-scrollbar">
+        <a href="../index.html" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
+          <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i> Portal Home
+        </a>
+        <a href="./command-center.html" class="text-cyan-400 border-b border-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5 font-bold">
+          <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Command Center
+        </a>
+        <a href="./mock-analyzer.html" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
+          <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Mock Analyzer
+        </a>
+        <a href="https://sandeshbanala0811.github.io/jee-formula-vault/index.html" target="_blank" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
+          <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Formula Vault
+        </a>
+      </nav>
+
+      <!-- Dynamic Micro-Metrics -->
+      <div class="flex items-center gap-4 text-[10px] text-zinc-500 font-semibold uppercase tracking-wider shrink-0 w-full md:w-auto justify-end border-t border-zinc-900/50 md:border-none pt-2 md:pt-0">
+        <span class="flex items-center gap-1 bg-zinc-950 px-2 py-1 rounded border border-zinc-900">
+          Total Time: <span id="total-hours-header" class="font-bold text-cyan-400">0.0 HRS</span>
+        </span>
+        <span class="flex items-center gap-1 bg-zinc-950 px-2 py-1 rounded border border-zinc-900">
+          Distractions: <span id="total-distractions-header" class="font-bold text-amber-400">0</span>
+        </span>
       </div>
     </div>
   </header>
@@ -119,216 +142,263 @@
   <!-- Notification Banner -->
   <div id="toast-container" class="fixed top-16 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Primary Dashboard Grid -->
+  <!-- Primary Workspace -->
   <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
-      <!-- LEFT MODULE: Mock Test Analytics Platform -->
-      <div class="lg:col-span-6 space-y-6">
+      <!-- LEFT WORKSPACE: Focus Timer & Unified Logger (Spans 5 Cols) -->
+      <div class="lg:col-span-5 space-y-6">
         
-        <!-- Log Mock Exam Card -->
-        <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded">
+        <!-- Interactive Focus Console -->
+        <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded relative overflow-hidden">
+          <div class="flex justify-between items-center mb-4 border-b border-zinc-800 pb-2">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> 01 // Focus Monitor
+            </h2>
+            <span id="timer-status" class="text-[10px] font-bold text-zinc-500 bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded uppercase">
+              Standby
+            </span>
+          </div>
+
+          <div class="flex items-center justify-between py-2">
+            <div>
+              <div id="timer-display" class="text-4xl font-bold tracking-tight text-zinc-100 font-mono">00:00</div>
+              <p class="text-[10px] text-zinc-500 uppercase tracking-wider mt-1">Elapsed Focus Time</p>
+            </div>
+            
+            <!-- Distraction Monitor Tally -->
+            <div class="text-right">
+              <button onclick="incrementDistractions()" class="active:scale-95 transition bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-zinc-400 px-3 py-2 rounded text-[11px] flex items-center gap-1.5 font-medium">
+                <i data-lucide="bell-ring" class="w-3.5 h-3.5 text-amber-500"></i>
+                Distractions
+                <span id="distraction-counter-badge" class="bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold text-xs px-2 py-0.5 rounded">0</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Timer Action Buttons -->
+          <div class="grid grid-cols-3 gap-2 mt-4">
+            <button id="btn-timer-primary" onclick="toggleTimer()" class="py-2 px-3 bg-cyan-600 hover:bg-cyan-500 text-black font-bold rounded text-xs uppercase flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="play" class="w-3.5 h-3.5" id="timer-icon-primary"></i>
+              <span id="timer-text-primary">Start</span>
+            </button>
+            <button onclick="resetTimer()" class="py-2 px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold rounded text-xs uppercase flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="square" class="w-3.5 h-3.5"></i>
+              Reset
+            </button>
+            <button onclick="finishAndTransferSession()" class="py-2 px-1 bg-zinc-950 border border-zinc-800 hover:border-cyan-500/50 text-cyan-400 font-bold rounded text-[10px] uppercase flex items-center justify-center gap-1 transition">
+              <i data-lucide="corner-down-right" class="w-3 h-3"></i>
+              Sync Time
+            </button>
+          </div>
+        </div>
+
+        <!-- Integrated Data Logger Form -->
+        <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded relative">
           <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mb-4 border-b border-zinc-800 pb-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> 01 // Register Mock Test Score
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> 02 // Unified Entry Form
           </h2>
 
-          <form id="mock-form" onsubmit="handleMockSubmit(event)" class="space-y-4 text-xs">
-            <!-- Test Meta Row -->
-            <div class="grid grid-cols-2 gap-3">
+          <form id="logger-form" onsubmit="handleLogSubmission(event)" class="space-y-4 text-xs">
+            <!-- Subject Selector -->
+            <div>
+              <label for="subject-select" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Subject Selection</label>
+              <select id="subject-select" onchange="populateChapters()" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
+                <option value="" disabled selected>Select Subject</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Physics">Physics</option>
+                <option value="Chemistry">Chemistry</option>
+              </select>
+            </div>
+
+            <!-- Chapter Selector -->
+            <div>
+              <label for="chapter-select" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Chapter Selection</label>
+              <select id="chapter-select" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 disabled:opacity-40 transition" disabled>
+                <option value="" disabled selected>Select Subject first</option>
+              </select>
+            </div>
+
+            <!-- Durations & Distractions Inline Row -->
+            <div class="grid grid-cols-2 gap-4">
               <div>
-                <label for="mock-name" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Exam Reference Name</label>
-                <input type="text" id="mock-name" required placeholder="e.g., Mains Revision 4" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
+                <label for="log-time" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Logged Time (Mins)</label>
+                <input type="number" id="log-time" required min="1" max="1440" placeholder="e.g., 45" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
               </div>
               <div>
-                <label for="mock-max" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Total Paper Marks</label>
-                <input type="number" id="mock-max" required min="1" placeholder="e.g., 300" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
+                <label for="log-distractions" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Distractions</label>
+                <input type="number" id="log-distractions" min="0" value="0" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
               </div>
             </div>
 
-            <!-- Scores Row -->
-            <div class="grid grid-cols-3 gap-3">
-              <div>
-                <label for="mock-math" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Maths Score</label>
-                <input type="number" id="mock-math" required min="0" placeholder="0" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
-              </div>
-              <div>
-                <label for="mock-phys" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Physics Score</label>
-                <input type="number" id="mock-phys" required min="0" placeholder="0" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
-              </div>
-              <div>
-                <label for="mock-chem" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Chemistry Score</label>
-                <input type="number" id="mock-chem" required min="0" placeholder="0" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
-              </div>
-            </div>
-
-            <!-- Tested Chapters Multi-Select Area -->
-            <div class="border-t border-zinc-800/80 pt-3 space-y-2">
-              <span class="block text-[9px] uppercase font-bold tracking-wider text-cyan-400">Tested Chapters (Select all that apply)</span>
-              <div class="grid grid-cols-3 gap-3">
-                <!-- Maths chapters multi-checkbox container -->
-                <div>
-                  <label class="block text-[9px] font-bold text-zinc-500 mb-1">Mathematics</label>
-                  <div id="mock-math-chaps" class="bg-zinc-950 border border-zinc-800 rounded p-1.5 h-28 overflow-y-auto custom-scrollbar space-y-1">
-                    <!-- Dynamic -->
-                  </div>
-                </div>
-                <!-- Physics chapters multi-checkbox container -->
-                <div>
-                  <label class="block text-[9px] font-bold text-zinc-500 mb-1">Physics</label>
-                  <div id="mock-phys-chaps" class="bg-zinc-950 border border-zinc-800 rounded p-1.5 h-28 overflow-y-auto custom-scrollbar space-y-1">
-                    <!-- Dynamic -->
-                  </div>
-                </div>
-                <!-- Chemistry chapters multi-checkbox container -->
-                <div>
-                  <label class="block text-[9px] font-bold text-zinc-500 mb-1">Chemistry</label>
-                  <div id="mock-chem-chaps" class="bg-zinc-950 border border-zinc-800 rounded p-1.5 h-28 overflow-y-auto custom-scrollbar space-y-1">
-                    <!-- Dynamic -->
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label for="mock-date" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Exam Date</label>
-                <input type="date" id="mock-date" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
-              </div>
-              <div class="flex items-end">
-                <button type="submit" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold uppercase rounded flex items-center justify-center gap-1.5 transition">
-                  <i data-lucide="plus" class="w-4 h-4"></i>
-                  Register Score
+            <!-- Difficulty Level Pills -->
+            <div>
+              <label class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Subjective Difficulty</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button type="button" onclick="setDifficultyPill('Easy')" id="pill-Easy" class="py-2 px-1 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-emerald-500/40 rounded transition">
+                  Easy
+                </button>
+                <button type="button" onclick="setDifficultyPill('Medium')" id="pill-Medium" class="py-2 px-1 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-amber-500/40 rounded transition">
+                  Medium
+                </button>
+                <button type="button" onclick="setDifficultyPill('Hard')" id="pill-Hard" class="py-2 px-1 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-red-500/40 rounded transition">
+                  Hard
                 </button>
               </div>
+              <input type="hidden" id="selected-difficulty" value="" required>
             </div>
-          </form>
-        </div>
 
-        <!-- Subject Weakness & Accuracy Analytics -->
-        <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded">
-          <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mb-4 border-b border-zinc-800 pb-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> 02 // Subject Mastery Analysis
-          </h2>
-
-          <div class="space-y-4">
-            <!-- Maths Avg -->
+            <!-- Target Study Status Checklist -->
             <div>
-              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
-                <span>MATHEMATICS AVG ACCURACY</span>
-                <span id="maths-avg-pct" class="text-cyan-400">0%</span>
-              </div>
-              <div class="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
-                <div id="maths-avg-bar" class="bg-cyan-500 h-full w-0 transition-all duration-300"></div>
+              <label class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Target Work Pillars Completed</label>
+              <div class="grid grid-cols-3 gap-2">
+                <label class="flex items-center justify-between p-2 rounded border border-zinc-800 bg-zinc-950/45 hover:bg-zinc-900 cursor-pointer transition">
+                  <span class="text-[10px]">Theory</span>
+                  <input type="checkbox" id="pillar-theory" class="rounded bg-zinc-950 border-zinc-800 text-cyan-500 focus:ring-0">
+                </label>
+                <label class="flex items-center justify-between p-2 rounded border border-zinc-800 bg-zinc-950/45 hover:bg-zinc-900 cursor-pointer transition">
+                  <span class="text-[10px]">DPPs</span>
+                  <input type="checkbox" id="pillar-dpps" class="rounded bg-zinc-950 border-zinc-800 text-cyan-500 focus:ring-0">
+                </label>
+                <label class="flex items-center justify-between p-2 rounded border border-zinc-800 bg-zinc-950/45 hover:bg-zinc-900 cursor-pointer transition">
+                  <span class="text-[10px]">PYQs</span>
+                  <input type="checkbox" id="pillar-pyqs" class="rounded bg-zinc-950 border-zinc-800 text-cyan-500 focus:ring-0">
+                </label>
               </div>
             </div>
 
-            <!-- Physics Avg -->
+            <!-- Focus Rating Slider -->
             <div>
-              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
-                <span>PHYSICS AVG ACCURACY</span>
-                <span id="physics-avg-pct" class="text-amber-500">0%</span>
+              <div class="flex justify-between items-center mb-1">
+                <label for="focus-rating" class="block text-[10px] uppercase font-bold text-zinc-500">Focus Index Rating</label>
+                <span id="focus-rating-display" class="text-[10px] font-bold text-cyan-400">3 // Medium Focus</span>
               </div>
-              <div class="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
-                <div id="physics-avg-bar" class="bg-amber-500 h-full w-0 transition-all duration-300"></div>
-              </div>
+              <input type="range" id="focus-rating" min="1" max="5" value="3" oninput="updateFocusRatingDisplay(this.value)" class="w-full accent-cyan-500 bg-zinc-800 h-1.5 rounded-lg appearance-none cursor-pointer">
             </div>
 
-            <!-- Chemistry Avg -->
-            <div>
-              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
-                <span>CHEMISTRY AVG ACCURACY</span>
-                <span id="chemistry-avg-pct" class="text-emerald-500">0%</span>
-              </div>
-              <div class="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
-                <div id="chemistry-avg-bar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recorded Exams History Log -->
-        <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded">
-          <p class="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-1.5 mb-3">Mock Exam History Ledger</p>
-          <div id="mock-test-ledger" class="space-y-2 max-h-[180px] overflow-y-auto custom-scrollbar">
-            <!-- Dynamic -->
-          </div>
-        </div>
-
-      </div>
-
-      <!-- RIGHT MODULE: Revision Guardian & Backlog Monitor -->
-      <div class="lg:col-span-6 space-y-6">
-        
-        <!-- Log Revision Checkpoint Form -->
-        <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded">
-          <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mb-4 border-b border-zinc-800 pb-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span> 03 // Register Revision Checkpoint
-          </h2>
-
-          <form id="checkpoint-form" onsubmit="handleCheckpointSubmit(event)" class="space-y-4 text-xs">
-            <div class="grid grid-cols-2 gap-3">
-              <!-- Cascading Subject -->
-              <div>
-                <label for="subject-select" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Subject</label>
-                <select id="subject-select" onchange="populateChapters()" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
-                  <option value="" disabled selected>Select Subject</option>
-                  <option value="Mathematics">Mathematics</option>
-                  <option value="Physics">Physics</option>
-                  <option value="Chemistry">Chemistry</option>
-                </select>
-              </div>
-
-              <!-- Cascading Chapter -->
-              <div>
-                <label for="chapter-select" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Chapter</label>
-                <select id="chapter-select" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 disabled:opacity-40 transition" disabled>
-                  <option value="" disabled selected>Select Subject first</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <!-- Checkpoint Difficulty -->
-              <div>
-                <label class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Retention Confidence</label>
-                <div class="grid grid-cols-3 gap-1">
-                  <button type="button" onclick="setDiffPill('Easy')" id="pill-Easy" class="py-1.5 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 rounded hover:border-emerald-500/40 transition">Easy</button>
-                  <button type="button" onclick="setDiffPill('Medium')" id="pill-Medium" class="py-1.5 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 rounded hover:border-amber-500/40 transition">Med</button>
-                  <button type="button" onclick="setDiffPill('Hard')" id="pill-Hard" class="py-1.5 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 rounded hover:border-red-500/40 transition">Hard</button>
-                </div>
-                <input type="hidden" id="selected-diff" value="" required>
-              </div>
-
-              <!-- Checkpoint Date -->
-              <div>
-                <label for="checkpoint-date" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Revision Date</label>
-                <input type="date" id="checkpoint-date" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
-              </div>
-            </div>
-
-            <button type="submit" class="w-full py-2 bg-zinc-100 hover:bg-zinc-200 text-black font-bold uppercase rounded flex items-center justify-center gap-1.5 transition">
-              <i data-lucide="calendar" class="w-4 h-4"></i>
-              Register Checkpoint
+            <!-- Submit Logs Button -->
+            <button type="submit" class="w-full py-2.5 bg-zinc-100 hover:bg-zinc-200 text-black font-bold uppercase rounded flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              Add Record to Logs
             </button>
           </form>
         </div>
+      </div>
 
-        <!-- Revision Decay & Backlog Alerts (Dynamic Watchdog) -->
+      <!-- RIGHT WORKSPACE: Performance Analytics & Consolidated Multi-Tab Module (Spans 7 Cols) -->
+      <div class="lg:col-span-7 space-y-6">
+        
+        <!-- Subject Hours Progress Visualization -->
         <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded">
           <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mb-4 border-b border-zinc-800 pb-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> 04 // Revision Decay & Backlogs
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> 03 // Cumulative Subject Hours
           </h2>
-          
-          <div id="backlog-alerts-feed" class="space-y-2 max-h-[350px] overflow-y-auto custom-scrollbar">
-            <!-- Dynamically calculated backlogs will list here -->
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Math -->
+            <div class="bg-zinc-950/50 p-3 rounded border border-zinc-800/60">
+              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
+                <span>MATHEMATICS</span>
+                <span id="math-hours-txt" class="text-cyan-400">0.0h</span>
+              </div>
+              <div class="w-full bg-zinc-900 h-1 rounded-full overflow-hidden">
+                <div id="math-hours-bar" class="bg-cyan-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+
+            <!-- Physics -->
+            <div class="bg-zinc-950/50 p-3 rounded border border-zinc-800/60">
+              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
+                <span>PHYSICS</span>
+                <span id="physics-hours-txt" class="text-amber-500">0.0h</span>
+              </div>
+              <div class="w-full bg-zinc-900 h-1 rounded-full overflow-hidden">
+                <div id="physics-hours-bar" class="bg-amber-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+
+            <!-- Chemistry -->
+            <div class="bg-zinc-950/50 p-3 rounded border border-zinc-800/60">
+              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
+                <span>CHEMISTRY</span>
+                <span id="chemistry-hours-txt" class="text-emerald-500">0.0h</span>
+              </div>
+              <div class="w-full bg-zinc-900 h-1 rounded-full overflow-hidden">
+                <div id="chemistry-hours-bar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Active Chapter Checkpoints Log -->
-        <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded">
-          <p class="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-1.5 mb-3">Revision Checkpoint Ledger</p>
-          <div id="checkpoint-ledger" class="space-y-2 max-h-[180px] overflow-y-auto custom-scrollbar">
-            <!-- Generated programmatically -->
+        <!-- Multi-Tab workspace containing Dynamic Matrix, Readiness & Audits -->
+        <div class="border border-zinc-800 bg-zinc-900/40 rounded flex flex-col min-h-[445px]">
+          
+          <!-- Tab Switchers -->
+          <div class="flex border-b border-zinc-800 bg-zinc-950/60 text-xs text-zinc-400">
+            <button onclick="setActiveTab('tab-matrix')" id="btn-tab-matrix" class="flex-1 py-3 text-center border-r border-zinc-800 font-bold uppercase tracking-wider text-cyan-400 border-b-2 border-b-cyan-500 bg-zinc-900/30 transition">
+              Difficulty Board
+            </button>
+            <button onclick="setActiveTab('tab-readiness')" id="btn-tab-readiness" class="flex-1 py-3 text-center border-r border-zinc-800 font-bold uppercase tracking-wider transition">
+              Syllabus Readiness
+            </button>
+            <button onclick="setActiveTab('tab-logs')" id="btn-tab-logs" class="flex-1 py-3 text-center font-bold uppercase tracking-wider transition">
+              Audit Feed
+            </button>
+          </div>
+
+          <!-- Tab Content Views -->
+          <div class="p-5 flex-1 flex flex-col justify-between">
+            
+            <!-- TAB 1: Difficulty Matrix -->
+            <div id="tab-matrix" class="tab-view space-y-4">
+              <p class="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-1">Dynamic Chapter Difficulty Matrix</p>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <!-- Easy Column -->
+                <div class="bg-zinc-950/40 border border-zinc-800 p-2.5 rounded min-h-[250px] flex flex-col">
+                  <span class="text-[10px] font-bold text-emerald-400 border-b border-zinc-800 pb-1 mb-2 block uppercase flex justify-between">
+                    <span>Easy Lanes</span>
+                    <span id="count-lane-easy" class="text-zinc-500">0</span>
+                  </span>
+                  <div id="lane-easy-list" class="space-y-1.5 flex-1 overflow-y-auto max-h-[200px] custom-scrollbar"></div>
+                </div>
+
+                <!-- Medium Column -->
+                <div class="bg-zinc-950/40 border border-zinc-800 p-2.5 rounded min-h-[250px] flex flex-col">
+                  <span class="text-[10px] font-bold text-amber-500 border-b border-zinc-800 pb-1 mb-2 block uppercase flex justify-between">
+                    <span>Medium Lanes</span>
+                    <span id="count-lane-medium" class="text-zinc-500">0</span>
+                  </span>
+                  <div id="lane-medium-list" class="space-y-1.5 flex-1 overflow-y-auto max-h-[200px] custom-scrollbar"></div>
+                </div>
+
+                <!-- Hard Column -->
+                <div class="bg-zinc-950/40 border border-zinc-800 p-2.5 rounded min-h-[250px] flex flex-col">
+                  <span class="text-[10px] font-bold text-red-400 border-b border-zinc-800 pb-1 mb-2 block uppercase flex justify-between">
+                    <span>Hard Lanes</span>
+                    <span id="count-lane-hard" class="text-zinc-500">0</span>
+                  </span>
+                  <div id="lane-hard-list" class="space-y-1.5 flex-1 overflow-y-auto max-h-[200px] custom-scrollbar"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: Syllabus Revision Readiness -->
+            <div id="tab-readiness" class="tab-view hidden space-y-3">
+              <p class="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-1">Syllabus Completion Index</p>
+              <div id="readiness-list" class="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+                <!-- Dynamically filled on updates -->
+              </div>
+            </div>
+
+            <!-- TAB 3: Recent Activity Logs -->
+            <div id="tab-logs" class="tab-view hidden space-y-3">
+              <p class="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-1">Historical Audit History Feed</p>
+              <div id="log-feed" class="space-y-2.5 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+                <!-- Log feed list -->
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -337,180 +407,94 @@
     </div>
   </main>
 
-  <!-- Interactive Logic -->
+  <!-- Technical Footer -->
+  <footer class="text-center text-[10px] tracking-widest text-zinc-600 border-t border-zinc-900 mt-12 py-6 uppercase">
+    MPC_COMMAND_CONSOLE_RECONFIGURED // SECURE_STORAGE_STATE_ON
+  </footer>
+
   <script>
-    // Master Verified Complete Syllabus
+    // Master Syllabus Dictionary
     const SYLLABUS_DATA = {
       "Mathematics": [
         "Sets, Relations & Functions",
-        "Trigonometric Ratios & Transformations",
-        "Trigonometric Equations",
-        "Inverse Trigonometric Functions",
-        "Hyperbolic Functions",
-        "Properties of Triangles & Heights & Distances",
-        "Complex Numbers & De Moivre’s Theorem",
-        "Quadratic Equations & Expressions",
-        "Theory of Equations",
-        "Linear Inequalities",
-        "Permutations & Combinations",
-        "Mathematical Induction",
-        "Binomial Theorem",
-        "Sequences and Series (AP, GP, HP)",
-        "Partial Fractions",
+        "Trigonometric Functions",
         "Matrices & Determinants",
-        "Addition of Vectors",
-        "Product of Vectors",
-        "Locus & Transformation of Axes",
-        "The Straight Line",
-        "Pair of Straight Lines",
-        "Circle & System of Circles",
-        "Parabola",
-        "Ellipse",
-        "Hyperbola",
-        "Three-Dimensional Geometry (Coordinates, Lines & Planes)",
-        "Direction Cosines & Direction Ratios",
-        "The Plane",
-        "Limits and Continuity",
-        "Differentiation (Methods of Differentiation)",
-        "Applications of Derivatives (Tangents, Monotonicity, Maxima-Minima)",
-        "Indefinite Integration",
-        "Definite Integrals & Area Under Curves",
+        "Quadratic Equations",
+        "Permutations & Combinations",
+        "Sequences & Series",
+        "Limits, Continuity & Differentiability",
+        "Integral Calculus",
         "Differential Equations",
-        "Measures of Dispersion & Statistics",
-        "Probability & Random Variables",
-        "Mathematical Reasoning"
+        "Vector Algebra & 3D Geometry",
+        "Probability"
       ],
       "Physics": [
-        "Physical World & Units and Measurements",
-        "Motion in a Straight Line (Kinematics 1D)",
-        "Motion in a Plane (Vectors, Projectile & Circular)",
-        "Laws of Motion & Friction",
-        "Work, Energy and Power",
-        "System of Particles and Centre of Mass",
-        "Rotational Motion & Rigid Body Dynamics",
+        "Units, Measurements & Kinematics",
+        "Laws of Motion",
+        "Work, Energy & Power",
+        "Rotational Motion",
         "Gravitation",
-        "Mechanical Properties of Solids (Elasticity)",
-        "Mechanical Properties of Fluids (Hydrostatics, Viscosity & Surface Tension)",
-        "Thermal Properties of Matter & Calorimetry",
-        "Thermodynamics",
-        "Kinetic Theory of Gases",
-        "Oscillations (Simple Harmonic Motion)",
-        "Waves & Sound Waves",
-        "Electric Charges and Fields (Electrostatics I)",
-        "Electrostatic Potential and Capacitance (Electrostatics II)",
+        "Thermodynamics & Kinetic Theory",
+        "Electrostatics",
         "Current Electricity",
-        "Moving Charges and Magnetism (Magnetic Effects of Current)",
-        "Magnetism and Matter",
-        "Electromagnetic Induction (EMI)",
-        "Alternating Current (AC)",
-        "Electromagnetic Waves",
-        "Ray Optics and Optical Instruments",
-        "Wave Optics (Interference, Diffraction & Polarization)",
-        "Dual Nature of Radiation and Matter",
-        "Atoms & Atomic Structure",
-        "Nuclei & Nuclear Physics",
-        "Semiconductor Electronics & Logic Gates",
-        "Communication Systems",
-        "Experimental Physics & Error Analysis"
+        "Magnetic Effects of Current",
+        "Electromagnetic Induction & AC",
+        "Optics (Ray & Wave)",
+        "Modern Physics"
       ],
       "Chemistry": [
-        "Some Basic Concepts of Chemistry (Mole Concept & Stoichiometry)",
+        "Some Basic Concepts of Chemistry",
         "Structure of Atom",
-        "Classification of Elements and Periodicity",
-        "Chemical Bonding and Molecular Structure",
-        "States of Matter: Gases and Liquids",
-        "Chemical Thermodynamics & Energetics",
-        "Chemical Equilibrium",
-        "Ionic Equilibrium & Acid-Bases",
-        "Redox Reactions & Oxidation Numbers",
-        "Hydrogen and its Compounds",
-        "s-Block Elements (Alkali & Alkaline Earth Metals)",
-        "p-Block Elements: Group 13 & 14 (Boron & Carbon Families)",
-        "Environmental Chemistry",
-        "General Organic Chemistry (GOC & Isomerism)",
-        "Hydrocarbons (Alkanes, Alkenes, Alkynes & Arenes)",
-        "Solid State",
-        "Solutions & Colligative Properties",
-        "Electrochemistry",
-        "Chemical Kinetics",
-        "Surface Chemistry",
-        "General Principles and Processes of Isolation of Elements (Metallurgy)",
-        "p-Block Elements: Group 15, 16, 17 & 18",
-        "d and f Block Elements",
-        "Coordination Compounds & Organometallics",
-        "Haloalkanes and Haloarenes",
-        "Alcohols, Phenols and Ethers",
-        "Aldehydes, Ketones and Carboxylic Acids",
-        "Organic Compounds Containing Nitrogen (Amines & Diazonium Salts)",
-        "Biomolecules",
-        "Polymers",
-        "Chemistry in Everyday Life",
-        "Practical & Analytical Chemistry (Salt Analysis)"
+        "Classification of Elements & Periodicity",
+        "Chemical Bonding",
+        "Chemical Thermodynamics",
+        "Equilibrium",
+        "Solutions",
+        "Electrochemistry & Kinetics",
+        "Coordination Compounds",
+        "Hydrocarbons",
+        "Halogen, Oxygen & Nitrogen Derivatives",
+        "Biomolecules"
       ]
     };
 
-    // User State Management variables
-    let activeUser = localStorage.getItem('mpc_companion_user') || "";
+    // Active Profile Handle State
+    let activeUser = localStorage.getItem('mpc_v3_user') || "";
     let loginMode = "local"; // "local" or "cloud"
     
     // Cloud Credentials Cache
-    let cloudUrl = localStorage.getItem('mpc_companion_url') || "";
-    let cloudKey = localStorage.getItem('mpc_companion_key') || "";
+    let cloudUrl = localStorage.getItem('mpc_v3_url') || "";
+    let cloudKey = localStorage.getItem('mpc_v3_key') || "";
     
-    // Database SDK Client (Named uniquely to avoid overshadowing global window.supabase)
-    let supabaseClient = null;
+    // Database SDK Client
+    let supabaseClient = null; // Renamed to avoid global namespace collision
 
-    let mockTests = [];
-    let checkpoints = [];
-    let selectedDiff = "";
+    // Local profile variables
+    let logs = [];
+    let chapterPillars = {};
+    let chapterDifficulty = {};
 
+    // Live Timer Controls State
+    let timerSeconds = 0;
+    let timerInterval = null;
+    let timerRunning = false;
+    let distractionsTally = 0;
+
+    let selectedDifficultyLevel = "";
+
+    const ratingDescriptions = {
+      1: "1 // Heavy Distractions / Fatigued",
+      2: "2 // Low Concentration",
+      3: "3 // Medium Focus",
+      4: "4 // High Attentive State",
+      5: "5 // Direct Flow State"
+    };
+
+    // Run on startup
     window.addEventListener('DOMContentLoaded', () => {
-      const todayString = new Date().toISOString().split('T')[0];
-      document.getElementById('mock-date').value = todayString;
-      document.getElementById('checkpoint-date').value = todayString;
-
-      populateMockLists();
       lucide.createIcons();
       verifyProfileSession();
     });
-
-    // Populate scroll boxes with multi-select checkboxes
-    function populateMockLists() {
-      const mathBox = document.getElementById('mock-math-chaps');
-      const physBox = document.getElementById('mock-phys-chaps');
-      const chemBox = document.getElementById('mock-chem-chaps');
-
-      SYLLABUS_DATA["Mathematics"].forEach(ch => {
-        mathBox.appendChild(createCheckboxItem("math-ch", ch));
-      });
-      SYLLABUS_DATA["Physics"].forEach(ch => {
-        physBox.appendChild(createCheckboxItem("phys-ch", ch));
-      });
-      SYLLABUS_DATA["Chemistry"].forEach(ch => {
-        chemBox.appendChild(createCheckboxItem("chem-ch", ch));
-      });
-    }
-
-    // Generate a single list checkbox row
-    function createCheckboxItem(prefix, name) {
-      const label = document.createElement('label');
-      label.className = "flex items-center gap-1.5 px-1 py-0.5 hover:bg-zinc-900 rounded cursor-pointer select-none text-[9px] text-zinc-400";
-      
-      const input = document.createElement('input');
-      input.type = "checkbox";
-      input.name = prefix;
-      input.value = name;
-      input.className = "rounded bg-zinc-900 border-zinc-800 text-cyan-500 focus:ring-0 w-3 h-3";
-      
-      const span = document.createElement('span');
-      span.className = "truncate";
-      span.textContent = name;
-      span.title = name;
-
-      label.appendChild(input);
-      label.appendChild(span);
-      return label;
-    }
 
     // Toggle Login Panel tab modes
     function toggleLoginMode(mode) {
@@ -539,41 +523,37 @@
       const modal = document.getElementById('profile-modal');
       if (!activeUser) {
         modal.classList.remove('hidden');
-        // Default select previous setup state if cached
         if (cloudUrl && cloudKey) {
           toggleLoginMode('cloud');
         }
       } else {
         modal.classList.add('hidden');
         document.getElementById('active-user-display').innerText = activeUser.toUpperCase();
-        
-        // Initialize connections
         initDatabaseConnection();
       }
     }
 
     function initDatabaseConnection() {
-      cloudUrl = localStorage.getItem('mpc_companion_url') || "";
-      cloudKey = localStorage.getItem('mpc_companion_key') || "";
+      cloudUrl = localStorage.getItem('mpc_v3_url') || "";
+      cloudKey = localStorage.getItem('mpc_v3_key') || "";
       
       const modeBadge = document.getElementById('app-mode-badge');
 
       if (cloudUrl && cloudKey) {
         try {
-          // Initialize using global window.supabase object from CDN
           supabaseClient = supabase.createClient(cloudUrl, cloudKey);
           modeBadge.innerText = "CLOUD";
-          modeBadge.className = "text-emerald-400 text-xs";
+          modeBadge.className = "text-emerald-400 text-xs font-bold px-1 border border-emerald-500/20 bg-emerald-950/20 rounded";
         } catch (err) {
           console.error("Supabase config error:", err);
           supabaseClient = null;
           modeBadge.innerText = "OFFLINE";
-          modeBadge.className = "text-cyan-400 text-xs";
+          modeBadge.className = "text-cyan-400 text-xs font-bold px-1 border border-cyan-500/20 bg-cyan-950/20 rounded";
         }
       } else {
         supabaseClient = null;
         modeBadge.innerText = "OFFLINE";
-        modeBadge.className = "text-cyan-400 text-xs";
+        modeBadge.className = "text-cyan-400 text-xs font-bold px-1 border border-cyan-500/20 bg-cyan-950/20 rounded";
       }
       
       loadProfileDatabases();
@@ -597,22 +577,25 @@
           return;
         }
 
-        localStorage.setItem('mpc_companion_url', urlInput);
-        localStorage.setItem('mpc_companion_key', keyInput);
+        localStorage.setItem('mpc_v3_url', urlInput);
+        localStorage.setItem('mpc_v3_key', keyInput);
       } else {
-        // Clear cached credentials if logging in local-only
-        localStorage.removeItem('mpc_companion_url');
-        localStorage.removeItem('mpc_companion_key');
+        localStorage.removeItem('mpc_v3_url');
+        localStorage.removeItem('mpc_v3_key');
       }
 
       activeUser = userValue;
-      localStorage.setItem('mpc_companion_user', activeUser);
+      localStorage.setItem('mpc_v3_user', activeUser);
       verifyProfileSession();
     }
 
     function switchProfile() {
+      if (timerRunning) toggleTimer();
+      resetTimer();
+      resetForm();
+      
       activeUser = "";
-      localStorage.removeItem('mpc_companion_user');
+      localStorage.removeItem('mpc_v3_user');
       document.getElementById('profile-input').value = "";
       verifyProfileSession();
     }
@@ -622,39 +605,24 @@
       if (supabaseClient) {
         showToast("Synchronizing with Cloud DB...", "cyan");
         try {
-          const { data: testData, error: tErr } = await supabaseClient
-            .from('mpc_mock_tests')
+          const { data, error } = await supabaseClient
+            .from('mpc_study_logs')
             .select('*')
             .eq('username', activeUser)
             .order('created_at', { ascending: false });
 
-          const { data: cpData, error: cErr } = await supabaseClient
-            .from('mpc_checkpoints')
-            .select('*')
-            .eq('username', activeUser);
+          if (error) throw error;
 
-          if (tErr || cErr) throw (tErr || cErr);
-
-          mockTests = (testData || []).map(t => ({
-            id: t.id,
-            name: t.name,
-            maxMarks: t.max_marks,
-            maths: t.maths,
-            phys: t.phys,
-            chem: t.chem,
-            total: t.total,
-            date: t.date,
-            mathsChapters: t.maths_chapters || [],
-            physicsChapters: t.physics_chapters || [],
-            chemistryChapters: t.chemistry_chapters || []
-          }));
-
-          checkpoints = (cpData || []).map(c => ({
-            id: c.id,
-            subject: c.subject,
-            chapter: c.chapter,
-            confidence: c.confidence,
-            date: c.date
+          logs = (data || []).map(r => ({
+            id: r.id,
+            timestamp: r.timestamp,
+            subject: r.subject,
+            chapter: r.chapter,
+            duration: r.duration,
+            distractions: r.distractions,
+            difficulty: r.difficulty,
+            focusRating: r.focus_rating,
+            pillars: { theory: r.theory, dpps: r.dpps, pyqs: r.pyqs }
           }));
 
           showToast("Cloud Sync Successful", "emerald");
@@ -670,8 +638,9 @@
     }
 
     function loadLocalBackup() {
-      mockTests = JSON.parse(localStorage.getItem(`mpc_companion_tests_${activeUser}`)) || [];
-      checkpoints = JSON.parse(localStorage.getItem(`mpc_companion_revisions_${activeUser}`)) || [];
+      logs = JSON.parse(localStorage.getItem(`mpc_v3_logs_${activeUser}`)) || [];
+      chapterPillars = JSON.parse(localStorage.getItem(`mpc_v3_pillars_${activeUser}`)) || {};
+      chapterDifficulty = JSON.parse(localStorage.getItem(`mpc_v3_difficulty_${activeUser}`)) || {};
     }
 
     // Populate Dynamic Cascading Chapter Selector
@@ -694,455 +663,461 @@
       }
     }
 
-    function setDiffPill(level) {
-      selectedDiff = level;
-      document.getElementById('selected-diff').value = level;
+    // Set Active Difficulty Pill in the logger
+    function setDifficultyPill(level) {
+      selectedDifficultyLevel = level;
+      document.getElementById('selected-difficulty').value = level;
 
       ['Easy', 'Medium', 'Hard'].forEach(lvl => {
         const pill = document.getElementById(`pill-${lvl}`);
         if (lvl === level) {
-          pill.className = "py-1.5 text-center border font-semibold text-black rounded transition " + 
+          pill.className = "py-2 px-1 text-center border font-semibold text-black rounded transition " + 
             (lvl === 'Easy' ? 'bg-emerald-400 border-emerald-400' : 
              lvl === 'Medium' ? 'bg-amber-400 border-amber-400' : 
              'bg-red-400 border-red-400');
         } else {
-          pill.className = "py-1.5 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-" + 
+          pill.className = "py-2 px-1 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-" + 
             (lvl === 'Easy' ? 'emerald' : lvl === 'Medium' ? 'amber' : 'red') + "-500/40 rounded transition";
         }
       });
     }
 
+    // Slider text callback
     function updateFocusRatingDisplay(val) {
       document.getElementById('focus-rating-display').innerText = ratingDescriptions[val] || `${val} // Rated`;
     }
 
-    /* Operations Writers */
-    async function handleMockSubmit(e) {
-      e.preventDefault();
+    /* Live Focus Timer controls */
+    function toggleTimer() {
+      const btnPrimary = document.getElementById('btn-timer-primary');
+      const textPrimary = document.getElementById('timer-text-primary');
+      const statusBadge = document.getElementById('timer-status');
 
-      const name = document.getElementById('mock-name').value.trim();
-      const maxMarks = parseInt(document.getElementById('mock-max').value, 10);
-      const maths = parseInt(document.getElementById('mock-math').value, 10);
-      const phys = parseInt(document.getElementById('mock-phys').value, 10);
-      const chem = parseInt(document.getElementById('mock-chem').value, 10);
-      const date = document.getElementById('mock-date').value;
+      if (!timerRunning) {
+        timerRunning = true;
+        btnPrimary.className = "py-2 px-3 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded text-xs uppercase flex items-center justify-center gap-1.5 transition";
+        textPrimary.innerText = "Pause";
+        statusBadge.innerText = "Active";
+        statusBadge.className = "text-[10px] font-bold text-cyan-400 bg-cyan-950/30 border border-cyan-500/30 px-2 py-0.5 rounded uppercase";
 
-      const mathsChapters = Array.from(document.querySelectorAll('input[name="math-ch"]:checked')).map(el => el.value);
-      const physicsChapters = Array.from(document.querySelectorAll('input[name="phys-ch"]:checked')).map(el => el.value);
-      const chemistryChapters = Array.from(document.querySelectorAll('input[name="chem-ch"]:checked')).map(el => el.value);
+        document.getElementById('timer-icon-primary').setAttribute('data-lucide', 'pause');
+        lucide.createIcons();
 
-      const total = maths + phys + chem;
+        timerInterval = setInterval(() => {
+          timerSeconds++;
+          updateTimerDisplay();
+        }, 1000);
+      } else {
+        timerRunning = false;
+        btnPrimary.className = "py-2 px-3 bg-cyan-600 hover:bg-cyan-500 text-black font-bold rounded text-xs uppercase flex items-center justify-center gap-1.5 transition";
+        textPrimary.innerText = "Resume";
+        statusBadge.innerText = "Paused";
+        statusBadge.className = "text-[10px] font-bold text-zinc-400 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded uppercase";
 
-      if (total > maxMarks) {
-        showToast("Score cannot exceed paper maximum marks.", "rose");
-        return;
+        document.getElementById('timer-icon-primary').setAttribute('data-lucide', 'play');
+        lucide.createIcons();
+
+        clearInterval(timerInterval);
       }
-
-      const mockEntry = {
-        id: 'mock_' + Date.now(),
-        name,
-        maxMarks,
-        maths,
-        phys,
-        chem,
-        total,
-        date,
-        mathsChapters,
-        physicsChapters,
-        chemistryChapters
-      };
-
-      mockTests.unshift(mockEntry);
-      
-      // Save local backup anyway for robustness
-      localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
-
-      // Push to Supabase if available
-      if (supabaseClient) {
-        const { error } = await supabaseClient
-          .from('mpc_mock_tests')
-          .insert({
-            id: mockEntry.id,
-            username: activeUser,
-            name: mockEntry.name,
-            max_marks: mockEntry.maxMarks,
-            maths: mockEntry.maths,
-            phys: mockEntry.phys,
-            chem: mockEntry.chem,
-            total: mockEntry.total,
-            date: mockEntry.date,
-            maths_chapters: mockEntry.mathsChapters,
-            physics_chapters: mockEntry.physicsChapters,
-            chemistry_chapters: mockEntry.chemistryChapters
-          });
-        if (error) {
-          console.error("Cloud Error:", error);
-          showToast("Written locally. Cloud synchronization error.", "amber");
-        }
-      }
-
-      refreshDashboard();
-
-      // Reset checkboxes & form
-      document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => cb.checked = false);
-      document.getElementById('mock-form').reset();
-      const todayString = new Date().toISOString().split('T')[0];
-      document.getElementById('mock-date').value = todayString;
-      showToast("Mock score registered.", "emerald");
     }
 
-    async function handleCheckpointSubmit(e) {
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      timerSeconds = 0;
+      distractionsTally = 0;
+      updateTimerDisplay();
+      document.getElementById('distraction-counter-badge').innerText = '0';
+
+      const btnPrimary = document.getElementById('btn-timer-primary');
+      const textPrimary = document.getElementById('timer-text-primary');
+      const statusBadge = document.getElementById('timer-status');
+
+      btnPrimary.className = "py-2 px-3 bg-cyan-600 hover:bg-cyan-500 text-black font-bold rounded text-xs uppercase flex items-center justify-center gap-1.5 transition";
+      textPrimary.innerText = "Start";
+      statusBadge.innerText = "Standby";
+      statusBadge.className = "text-[10px] font-bold text-zinc-500 bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded uppercase";
+
+      document.getElementById('timer-icon-primary').setAttribute('data-lucide', 'play');
+      lucide.createIcons();
+    }
+
+    function incrementDistractions() {
+      distractionsTally++;
+      document.getElementById('distraction-counter-badge').innerText = distractionsTally;
+      showToast("Distraction incremented.", "amber");
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timerSeconds / 60);
+      const secs = timerSeconds % 60;
+      document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function finishAndTransferSession() {
+      if (timerSeconds < 5) {
+        showToast("Session duration too low to sync.", "rose");
+        return;
+      }
+      const rawMins = Math.max(1, Math.round(timerSeconds / 60));
+      document.getElementById('log-time').value = rawMins;
+      document.getElementById('log-distractions').value = distractionsTally;
+
+      showToast("Time synced. Complete form entries to save.", "cyan");
+      if (timerRunning) toggleTimer();
+    }
+
+    /* Core Logger Submissions */
+    async function handleLogSubmission(e) {
       e.preventDefault();
 
       const subject = document.getElementById('subject-select').value;
       const chapter = document.getElementById('chapter-select').value;
-      const confidence = document.getElementById('selected-diff').value;
-      const date = document.getElementById('checkpoint-date').value;
+      const duration = parseInt(document.getElementById('log-time').value, 10);
+      const distractions = parseInt(document.getElementById('log-distractions').value, 10) || 0;
+      const difficulty = document.getElementById('selected-difficulty').value;
+      const focusRating = parseInt(document.getElementById('focus-rating').value, 10);
 
-      if (!confidence) {
-        showToast("Please choose confidence index.", "rose");
+      if (!difficulty) {
+        showToast("Choose subjective difficulty level first.", "rose");
         return;
       }
 
-      const checkpointEntry = {
-        id: 'rev_' + Date.now(),
+      const theory = document.getElementById('pillar-theory').checked;
+      const dpps = document.getElementById('pillar-dpps').checked;
+      const pyqs = document.getElementById('pillar-pyqs').checked;
+
+      const newRecord = {
+        id: 'rec_' + Date.now(),
+        timestamp: new Date().toISOString(),
         subject,
         chapter,
-        confidence,
-        date
+        duration,
+        distractions,
+        difficulty,
+        focusRating,
+        pillars: { theory, dpps, pyqs }
       };
 
-      // Filter local state duplicates
-      checkpoints = checkpoints.filter(cp => cp.chapter !== chapter);
-      checkpoints.unshift(checkpointEntry);
-      localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
+      logs.unshift(newRecord);
+      saveState();
 
-      // Push to Cloud
+      // Cloud Push
       if (supabaseClient) {
-        // Delete older database chapter entries to keep strictly latest record
-        await supabaseClient
-          .from('mpc_checkpoints')
-          .delete()
-          .eq('username', activeUser)
-          .eq('chapter', chapter);
-
         const { error } = await supabaseClient
-          .from('mpc_checkpoints')
+          .from('mpc_study_logs')
           .insert({
-            id: checkpointEntry.id,
+            id: newRecord.id,
             username: activeUser,
-            subject: checkpointEntry.subject,
-            chapter: checkpointEntry.chapter,
-            confidence: checkpointEntry.confidence,
-            date: checkpointEntry.date
+            timestamp: newRecord.timestamp,
+            subject: newRecord.subject,
+            chapter: newRecord.chapter,
+            duration: newRecord.duration,
+            distractions: newRecord.distractions,
+            difficulty: newRecord.difficulty,
+            focus_rating: newRecord.focusRating,
+            theory: newRecord.pillars.theory,
+            dpps: newRecord.pillars.dpps,
+            pyqs: newRecord.pillars.pyqs
           });
-        
         if (error) {
-          console.error("Cloud write error:", error);
-          showToast("Saved locally. Cloud synchronization issues.", "amber");
+          console.error("Cloud insert error:", error);
+          showToast("Saved locally. Cloud synchronization error.", "amber");
         }
       }
 
       refreshDashboard();
+      resetForm();
+      showToast("Activity recorded.", "emerald");
+    }
 
-      // Reset fields
-      document.getElementById('checkpoint-form').reset();
+    function resetForm() {
+      document.getElementById('logger-form').reset();
       document.getElementById('chapter-select').disabled = true;
       document.getElementById('chapter-select').innerHTML = '<option value="" disabled selected>Select Subject first</option>';
       
-      selectedDiff = "";
-      document.getElementById('selected-diff').value = "";
+      selectedDifficultyLevel = "";
+      document.getElementById('selected-difficulty').value = "";
       ['Easy', 'Medium', 'Hard'].forEach(lvl => {
-        document.getElementById(`pill-${lvl}`).className = "py-1.5 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-" + (lvl === 'Easy' ? 'emerald' : lvl === 'Medium' ? 'amber' : 'red') + "-500/40 rounded transition";
+        document.getElementById(`pill-${lvl}`).className = "py-2 px-1 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-" + (lvl === 'Easy' ? 'emerald' : lvl === 'Medium' ? 'amber' : 'red') + "-500/40 rounded transition";
       });
-
-      const todayString = new Date().toISOString().split('T')[0];
-      document.getElementById('checkpoint-date').value = todayString;
-      showToast("Revision checkpoint registered.", "emerald");
+      updateFocusRatingDisplay(3);
     }
 
-    async function deleteMockRecord(id) {
-      mockTests = mockTests.filter(t => t.id !== id);
-      localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
+    // Handle shift difficulty button actions in column lists
+    async function shiftDifficultyLevel(chapter, currentLevel) {
+      const nextMap = { 'Easy': 'Medium', 'Medium': 'Hard', 'Hard': 'Easy' };
+      const nextLevel = nextMap[currentLevel];
+      
+      // Update local state difficulty
+      chapterDifficulty[chapter] = nextLevel;
+
+      // When shifting difficulty, update the latest study log containing this chapter
+      const targetLog = logs.find(log => log.chapter === chapter);
+      if (targetLog) {
+        targetLog.difficulty = nextLevel;
+        saveState();
+
+        if (supabaseClient) {
+          const { error } = await supabaseClient
+            .from('mpc_study_logs')
+            .update({ difficulty: nextLevel })
+            .eq('id', targetLog.id);
+          if (error) console.error("Cloud update error:", error);
+        }
+      }
+
+      refreshDashboard();
+      showToast(`Moved "${chapter}" difficulty index to ${nextLevel}.`, "cyan");
+    }
+
+    async function deleteLogRecord(id) {
+      logs = logs.filter(log => log.id !== id);
+      saveState();
 
       if (supabaseClient) {
-        const { error } = await supabaseClient.from('mpc_mock_tests').delete().eq('id', id);
-        if (error) console.error("Cloud deletion issues:", error);
-      }
-
-      refreshDashboard();
-      showToast("Mock record cleared.", "rose");
-    }
-
-    async function deleteCheckpointRecord(id) {
-      const target = checkpoints.find(c => c.id === id);
-      checkpoints = checkpoints.filter(c => c.id !== id);
-      localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
-
-      if (supabaseClient && target) {
         const { error } = await supabaseClient
-          .from('mpc_checkpoints')
+          .from('mpc_study_logs')
           .delete()
           .eq('id', id);
-        if (error) console.error("Cloud deletion issues:", error);
+        if (error) console.error("Cloud deletion issue:", error);
       }
 
       refreshDashboard();
-      showToast("Checkpoint record cleared.", "rose");
+      showToast("Log entry cleared.", "rose");
     }
 
-    /* Calculations & Board Sync */
+    function saveState() {
+      if (!activeUser) return;
+      localStorage.setItem(`mpc_v3_logs_${activeUser}`, JSON.stringify(logs));
+    }
+
+    async function resetAllData() {
+      if (!activeUser) return;
+      if (confirm(`Clear all logs and metrics registered under active profile "${activeUser}"?`)) {
+        localStorage.removeItem(`mpc_v3_logs_${activeUser}`);
+        
+        if (supabaseClient) {
+          const { error } = await supabaseClient
+            .from('mpc_study_logs')
+            .delete()
+            .eq('username', activeUser);
+          if (error) console.error("Cloud reset issues:", error);
+        }
+
+        logs = [];
+        chapterPillars = {};
+        chapterDifficulty = {};
+        resetTimer();
+        resetForm();
+        refreshDashboard();
+        showToast("Profile storage partition cleared.", "rose");
+      }
+    }
+
+    /* Tab Switcher Interface logic */
+    function setActiveTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+
+      const tabs = ['tab-matrix', 'tab-readiness', 'tab-logs'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`btn-${t}`);
+        if (t === tabId) {
+          btn.className = "flex-1 py-3 text-center border-r border-zinc-800 font-bold uppercase tracking-wider text-cyan-400 border-b-2 border-b-cyan-500 bg-zinc-900/30 transition";
+        } else {
+          btn.className = "flex-1 py-3 text-center border-r border-zinc-800 font-bold uppercase tracking-wider transition hover:bg-zinc-900/10";
+        }
+      });
+    }
+
+    // Recalculates structured states dynamically from the chronological history logs
+    function recalculateChapterAggregates() {
+      chapterPillars = {};
+      chapterDifficulty = {};
+
+      // Parse array from oldest to newest (so newer submissions cleanly overwrite older aggregates)
+      [...logs].reverse().forEach(log => {
+        const chap = log.chapter;
+        if (!chapterPillars[chap]) {
+          chapterPillars[chap] = { theory: false, dpps: false, pyqs: false };
+        }
+        if (log.pillars.theory) chapterPillars[chap].theory = true;
+        if (log.pillars.dpps) chapterPillars[chap].dpps = true;
+        if (log.pillars.pyqs) chapterPillars[chap].pyqs = true;
+
+        chapterDifficulty[chap] = log.difficulty;
+      });
+    }
+
+    /* Layout Updates & Dynamic Rendering */
     function refreshDashboard() {
-      // 1. Calculate Average Score Accuracy Percentage
-      let mathSumPct = 0, physSumPct = 0, chemSumPct = 0;
-      let totalTestsCount = mockTests.length;
+      // Re-compile chapter aggregates dynamically first to prevent mismatch
+      recalculateChapterAggregates();
 
-      if (totalTestsCount > 0) {
-        mockTests.forEach(test => {
-          const subjectMaxMarks = test.maxMarks / 3;
-          mathSumPct += (test.maths / subjectMaxMarks) * 100;
-          physSumPct += (test.phys / subjectMaxMarks) * 100;
-          chemSumPct += (test.chem / subjectMaxMarks) * 100;
-        });
+      let totalMins = 0;
+      let totalDistractions = 0;
+      let subjectTimes = { "Mathematics": 0, "Physics": 0, "Chemistry": 0 };
 
-        const mathAvg = Math.min(100, Math.round(mathSumPct / totalTestsCount));
-        const physAvg = Math.min(100, Math.round(physSumPct / totalTestsCount));
-        const chemAvg = Math.min(100, Math.round(chemSumPct / totalTestsCount));
+      logs.forEach(log => {
+        totalMins += log.duration;
+        totalDistractions += log.distractions;
+        if (subjectTimes[log.subject] !== undefined) {
+          subjectTimes[log.subject] += log.duration;
+        }
+      });
 
-        document.getElementById('maths-avg-pct').innerText = `${mathAvg}%`;
-        document.getElementById('maths-avg-bar').style.width = `${mathAvg}%`;
+      document.getElementById('total-hours-header').innerText = `${(totalMins / 60).toFixed(1)} HRS`;
+      document.getElementById('total-distractions-header').innerText = totalDistractions;
 
-        document.getElementById('physics-avg-pct').innerText = `${physAvg}%`;
-        document.getElementById('physics-avg-bar').style.width = `${physAvg}%`;
-
-        document.getElementById('chemistry-avg-pct').innerText = `${chemAvg}%`;
-        document.getElementById('chemistry-avg-bar').style.width = `${chemAvg}%`;
-      } else {
-        ['maths', 'physics', 'chemistry'].forEach(sub => {
-          document.getElementById(`${sub}-avg-pct`).innerText = '0%';
-          document.getElementById(`${sub}-avg-bar`).style.width = '0%';
-        });
+      const peakMins = Math.max(...Object.values(subjectTimes), 1);
+      for (const sub in subjectTimes) {
+        const hours = (subjectTimes[sub] / 60).toFixed(1);
+        const subId = sub === "Mathematics" ? "math-hours" : sub === "Physics" ? "physics-hours" : "chemistry-hours";
+        document.getElementById(`${subId}-txt`).innerText = `${hours}h`;
+        const calculatedPercent = Math.min(100, Math.round((subjectTimes[sub] / peakMins) * 100));
+        document.getElementById(`${subId}-bar`).style.width = `${calculatedPercent}%`;
       }
 
-      // 2. Populate Ledger list
-      const testLedger = document.getElementById('mock-test-ledger');
-      if (mockTests.length === 0) {
-        testLedger.innerHTML = '<p class="text-[10px] text-zinc-600 text-center py-12">No recorded mock exams registered.</p>';
-      } else {
-        testLedger.innerHTML = '';
-        mockTests.forEach(test => {
-          const pct = Math.round((test.total / test.maxMarks) * 100);
-          const colorMarker = pct >= 75 ? 'border-l-emerald-500' : pct >= 50 ? 'border-l-amber-500' : 'border-l-red-500';
-          const totalChapsLogged = (test.mathsChapters?.length || 0) + (test.physicsChapters?.length || 0) + (test.chemistryChapters?.length || 0);
+      // Populate Difficulty Matrix Board lists
+      const easyCol = document.getElementById('lane-easy-list');
+      const mediumCol = document.getElementById('lane-medium-list');
+      const hardCol = document.getElementById('lane-hard-list');
 
-          const card = document.createElement('div');
-          card.className = `p-2.5 bg-zinc-950 border border-zinc-800/80 rounded border-l-2 ${colorMarker} flex justify-between items-center text-[10px]`;
-          card.innerHTML = `
-            <div class="min-w-0 flex-1 pr-2">
-              <span class="font-bold text-zinc-300 truncate block">${test.name}</span>
-              <div class="flex items-center gap-2 text-[8px] text-zinc-500 uppercase mt-0.5 font-semibold">
-                <span>Date: ${test.date}</span>
-                <span>Marks: ${test.total}/${test.maxMarks} (${pct}%)</span>
-                <span>Chaps: ${totalChapsLogged}</span>
-              </div>
-            </div>
-            <div class="flex items-center gap-3">
-              <div class="text-right text-[8px] text-zinc-400 font-bold hidden sm:block">
-                <span>M:${test.maths} P:${test.phys} C:${test.chem}</span>
-              </div>
-              <button onclick="deleteMockRecord('${test.id}')" class="text-zinc-600 hover:text-red-400 p-1 transition" title="Delete Score">
-                <i data-lucide="trash" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          `;
-          testLedger.appendChild(card);
-        });
-      }
+      easyCol.innerHTML = '';
+      mediumCol.innerHTML = '';
+      hardCol.innerHTML = '';
 
-      // 3. Process Warnings & decay
-      const alertsFeed = document.getElementById('backlog-alerts-feed');
-      alertsFeed.innerHTML = '';
+      let cEasy = 0, cMedium = 0, cHard = 0;
 
-      const now = new Date();
-      let urgentCount = 0;
-      let decayWarningsList = [];
-
-      const latestCheckpointDate = {};
-      checkpoints.forEach(cp => {
-        if (!latestCheckpointDate[cp.chapter]) {
-          latestCheckpointDate[cp.chapter] = new Date(cp.date);
-        }
-      });
-
-      // Part A: Process Mock Exam < 60% failures
-      mockTests.forEach(test => {
-        const testDate = new Date(test.date);
-        const maxSubMarks = test.maxMarks / 3;
-
-        if (test.mathsChapters && test.mathsChapters.length > 0) {
-          const mathPct = Math.round((test.maths / maxSubMarks) * 100);
-          if (mathPct < 60) {
-            test.mathsChapters.forEach(chap => {
-              const lastRevised = latestCheckpointDate[chap];
-              if (!lastRevised || lastRevised < testDate) {
-                decayWarningsList.push({
-                  chapter: chap,
-                  subject: "Mathematics",
-                  days: Math.floor(Math.abs(now - testDate) / (1000 * 60 * 60 * 24)),
-                  confidence: "Critical",
-                  label: `FAILED EXAM PERFORMANCE WARNING // SCORED ${mathPct}% IN MATHS ON EXAM "${test.name.toUpperCase()}"`
-                });
-                urgentCount++;
-              }
-            });
+      Object.keys(chapterDifficulty).forEach(chap => {
+        const diff = chapterDifficulty[chap];
+        let parentSub = "Unknown";
+        for (const sub in SYLLABUS_DATA) {
+          if (SYLLABUS_DATA[sub].includes(chap)) {
+            parentSub = sub;
+            break;
           }
         }
 
-        if (test.physicsChapters && test.physicsChapters.length > 0) {
-          const physPct = Math.round((test.phys / maxSubMarks) * 100);
-          if (physPct < 60) {
-            test.physicsChapters.forEach(chap => {
-              const lastRevised = latestCheckpointDate[chap];
-              if (!lastRevised || lastRevised < testDate) {
-                decayWarningsList.push({
-                  chapter: chap,
-                  subject: "Physics",
-                  days: Math.floor(Math.abs(now - testDate) / (1000 * 60 * 60 * 24)),
-                  confidence: "Critical",
-                  label: `FAILED EXAM PERFORMANCE WARNING // SCORED ${physPct}% IN PHYSICS ON EXAM "${test.name.toUpperCase()}"`
-                });
-                urgentCount++;
-              }
-            });
-          }
-        }
+        const badgeStyle = parentSub === "Mathematics" ? "text-cyan-400" : parentSub === "Physics" ? "text-amber-500" : "text-emerald-400";
 
-        if (test.chemistryChapters && test.chemistryChapters.length > 0) {
-          const chemPct = Math.round((test.chem / maxSubMarks) * 100);
-          if (chemPct < 60) {
-            test.chemistryChapters.forEach(chap => {
-              const lastRevised = latestCheckpointDate[chap];
-              if (!lastRevised || lastRevised < testDate) {
-                decayWarningsList.push({
-                  chapter: chap,
-                  subject: "Chemistry",
-                  days: Math.floor(Math.abs(now - testDate) / (1000 * 60 * 60 * 24)),
-                  confidence: "Critical",
-                  label: `FAILED EXAM PERFORMANCE WARNING // SCORED ${chemPct}% IN CHEMISTRY ON EXAM "${test.name.toUpperCase()}"`
-                });
-                urgentCount++;
-              }
-            });
-          }
-        }
-      });
-
-      // Part B: Process Time Decay Revisions
-      checkpoints.forEach(cp => {
-        const cpDate = new Date(cp.date);
-        const elapsedDays = Math.floor(Math.abs(now - cpDate) / (1000 * 60 * 60 * 24));
-
-        let conditionMet = false;
-        let warningLabel = "";
-
-        if (cp.confidence === 'Hard' && elapsedDays > 7) {
-          conditionMet = true;
-          warningLabel = "HARD TOPIC ROT WARNING // NEGLECTED OVER 7 DAYS";
-        } else if (cp.confidence === 'Medium' && elapsedDays > 14) {
-          conditionMet = true;
-          warningLabel = "MEDIUM TOPIC ROT WARNING // NEGLECTED OVER 14 DAYS";
-        } else if (cp.confidence === 'Easy' && elapsedDays > 28) {
-          conditionMet = true;
-          warningLabel = "EASY TOPIC DECAY WARNING // NEGLECTED OVER 28 DAYS";
-        }
-
-        if (conditionMet) {
-          const exists = decayWarningsList.some(item => item.chapter === cp.chapter);
-          if (!exists) {
-            decayWarningsList.push({
-              chapter: cp.chapter,
-              subject: cp.subject,
-              days: elapsedDays,
-              confidence: cp.confidence,
-              label: warningLabel
-            });
-            urgentCount++;
-          }
-        }
-      });
-
-      document.getElementById('global-backlog-count').innerText = urgentCount;
-
-      if (decayWarningsList.length === 0) {
-        alertsFeed.innerHTML = `
-          <div class="flex items-center gap-2 p-3 bg-emerald-950/20 border border-emerald-500/20 rounded text-[10px] text-emerald-400 font-bold">
-            <i data-lucide="shield-check" class="w-4 h-4"></i>
-            <span>SYSTEM MONITOR STABLE // ALL TESTED & LEARNED TOPICS OPTIMIZED</span>
+        const card = document.createElement('div');
+        card.className = "p-2 bg-zinc-950 border border-zinc-800/80 rounded flex flex-col gap-1";
+        card.innerHTML = `
+          <span class="text-[10px] text-zinc-300 font-bold truncate leading-snug" title="${chap}">${chap}</span>
+          <div class="flex items-center justify-between text-[8px] font-bold">
+            <span class="${badgeStyle}">${parentSub.toUpperCase()}</span>
+            <button onclick="shiftDifficultyLevel('${chap}', '${diff}')" class="text-zinc-600 hover:text-cyan-400 transition" title="Change difficulty classification">SHIFT</button>
           </div>
         `;
+
+        if (diff === 'Easy') {
+          easyCol.appendChild(card);
+          cEasy++;
+        } else if (diff === 'Medium') {
+          mediumCol.appendChild(card);
+          cMedium++;
+        } else if (diff === 'Hard') {
+          hardCol.appendChild(card);
+          cHard++;
+        }
+      });
+
+      document.getElementById('count-lane-easy').innerText = cEasy;
+      document.getElementById('count-lane-medium').innerText = cMedium;
+      document.getElementById('count-lane-hard').innerText = cHard;
+
+      if (cEasy === 0) easyCol.innerHTML = '<span class="text-[9px] text-zinc-600 text-center block py-4">No Chapters</span>';
+      if (cMedium === 0) mediumCol.innerHTML = '<span class="text-[9px] text-zinc-600 text-center block py-4">No Chapters</span>';
+      if (cHard === 0) hardCol.innerHTML = '<span class="text-[9px] text-zinc-600 text-center block py-4">No Chapters</span>';
+
+      // Populate Revision Readiness list
+      const readinessList = document.getElementById('readiness-list');
+      const activeChapters = Object.keys(chapterPillars);
+
+      if (activeChapters.length === 0) {
+        readinessList.innerHTML = '<p class="text-[10px] text-zinc-600 text-center py-12">Submit logs to evaluate chapter revision status.</p>';
       } else {
-        decayWarningsList.sort((a, b) => b.days - a.days);
-        decayWarningsList.forEach(item => {
-          const warnCard = document.createElement('div');
-          const borderStyle = item.confidence === 'Critical' ? 'border-red-500 bg-red-950/20 text-red-200' : item.confidence === 'Hard' ? 'border-red-500/30 bg-red-950/10 text-red-300' : 'border-amber-500/30 bg-amber-950/10 text-amber-300';
-          warnCard.className = `p-2.5 border rounded flex justify-between items-center text-[10px] leading-tight font-bold ${borderStyle}`;
-          warnCard.innerHTML = `
-            <div class="truncate pr-2">
-              <span class="text-[8px] tracking-wider opacity-85 font-bold uppercase block text-xs">${item.label}</span>
-              <span class="block truncate font-bold text-zinc-200 mt-1" title="${item.chapter}">${item.chapter}</span>
+        readinessList.innerHTML = '';
+        activeChapters.forEach(chap => {
+          const metrics = chapterPillars[chap];
+          let parentSub = "Unknown";
+          for (const sub in SYLLABUS_DATA) {
+            if (SYLLABUS_DATA[sub].includes(chap)) {
+              parentSub = sub;
+              break;
+            }
+          }
+
+          let score = 0;
+          if (metrics.theory) score++;
+          if (metrics.dpps) score++;
+          if (metrics.pyqs) score++;
+          const scorePercent = Math.round((score / 3) * 100);
+
+          const tBadge = metrics.theory ? "bg-emerald-950 text-emerald-400 border-emerald-500/20" : "bg-zinc-950 text-zinc-600 border-zinc-900";
+          const dBadge = metrics.dpps ? "bg-emerald-950 text-emerald-400 border-emerald-500/20" : "bg-zinc-950 text-zinc-600 border-zinc-900";
+          const pBadge = metrics.pyqs ? "bg-emerald-950 text-emerald-400 border-emerald-500/20" : "bg-zinc-950 text-zinc-600 border-zinc-900";
+
+          const subBorder = parentSub === "Mathematics" ? "border-l-cyan-500" : parentSub === "Physics" ? "border-l-amber-500" : "border-l-emerald-500";
+
+          const el = document.createElement('div');
+          el.className = `p-2 bg-zinc-950/60 border border-zinc-800 rounded flex justify-between items-center border-l-2 ${subBorder}`;
+          el.innerHTML = `
+            <div class="min-w-0 flex-1">
+              <span class="text-[10px] font-bold text-zinc-300 block truncate" title="${chap}">${chap}</span>
+              <span class="text-[8px] text-zinc-500 uppercase tracking-wider">${parentSub}</span>
             </div>
-            <div class="shrink-0 text-right text-[9px] ml-2">
-              <span>Elapsed: ${item.days}d</span>
-              <span class="block text-[8px] text-cyan-400 opacity-80 mt-0.5">Status: ${item.confidence}</span>
+            <div class="flex items-center gap-3 ml-2">
+              <div class="flex gap-1 text-[8px] font-bold">
+                <span class="px-1.5 py-0.5 rounded border ${tBadge}">T</span>
+                <span class="px-1.5 py-0.5 rounded border ${dBadge}">D</span>
+                <span class="px-1.5 py-0.5 rounded border ${pBadge}">P</span>
+              </div>
+              <span class="text-[9px] font-bold text-cyan-400 w-10 text-right">${scorePercent}%</span>
             </div>
           `;
-          alertsFeed.appendChild(warnCard);
+          readinessList.appendChild(el);
         });
       }
 
-      // Populate Checkpoint Ledger
-      const checkpointLedger = document.getElementById('checkpoint-ledger');
-      if (checkpoints.length === 0) {
-        checkpointLedger.innerHTML = '<p class="text-[10px] text-zinc-600 text-center py-12">No registered revision checkpoints found.</p>';
+      // Populate Audit Logs Feed
+      const logFeed = document.getElementById('log-feed');
+      if (logs.length === 0) {
+        logFeed.innerHTML = '<p class="text-[10px] text-zinc-600 text-center py-12">No activity records in current archive.</p>';
       } else {
-        checkpointLedger.innerHTML = '';
-        checkpoints.forEach(cp => {
-          const cpDateStr = new Date(cp.date).toLocaleDateString();
-          const subBorder = cp.subject === "Mathematics" ? "border-l-cyan-500" : cp.subject === "Physics" ? "border-l-amber-500" : "border-l-emerald-500";
-          const diffBadge = cp.confidence === 'Easy' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : cp.confidence === 'Medium' ? 'text-amber-500 bg-amber-500/10 border-amber-500/20' : 'text-red-400 bg-red-500/10 border-red-500/20';
+        logFeed.innerHTML = '';
+        logs.forEach(record => {
+          const formattedTime = new Date(record.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const diffBorder = record.difficulty === 'Easy' ? 'border-l-emerald-500' : record.difficulty === 'Medium' ? 'border-l-amber-500' : 'border-l-red-500';
 
-          const card = document.createElement('div');
-          card.className = `p-2.5 bg-zinc-950 border border-zinc-800 rounded flex justify-between items-center border-l-2 ${subBorder} text-[10px]`;
-          card.innerHTML = `
-            <div class="min-w-0 flex-1 pr-2">
-              <span class="font-bold text-zinc-300 block truncate" title="${cp.chapter}">${cp.chapter}</span>
-              <span class="text-[8px] text-zinc-500 uppercase tracking-wider">${cp.subject} &bull; Checkpoint: ${cpDateStr}</span>
+          const container = document.createElement('div');
+          container.className = `p-2.5 bg-zinc-950/80 border border-zinc-800/80 rounded border-l-2 ${diffBorder} flex justify-between items-center gap-3`;
+          container.innerHTML = `
+            <div class="min-w-0 flex-1">
+              <span class="text-[10px] font-bold text-zinc-300 truncate block">${record.chapter}</span>
+              <div class="flex items-center gap-2 text-[8px] text-zinc-500 uppercase font-semibold mt-0.5">
+                <span>⏳ ${record.duration} mins</span>
+                <span>🔔 ${record.distractions} dst.</span>
+                <span>⚡ Focus: ${record.focusRating}/5</span>
+              </div>
             </div>
-            <div class="flex items-center gap-3">
-              <span class="text-[8px] px-1.5 py-0.5 rounded border ${diffBadge}">${cp.confidence}</span>
-              <button onclick="deleteCheckpointRecord('${cp.id}')" class="text-zinc-600 hover:text-red-400 p-1 transition" title="Delete checkpoint">
+            <div class="flex items-center gap-2">
+              <span class="text-[8px] text-zinc-600">${formattedTime}</span>
+              <button onclick="deleteLogRecord('${record.id}')" class="text-zinc-600 hover:text-red-400 p-1 transition" title="Delete record">
                 <i data-lucide="trash" class="w-3.5 h-3.5"></i>
               </button>
             </div>
           `;
-          checkpointLedger.appendChild(card);
+          logFeed.appendChild(container);
         });
       }
 
       lucide.createIcons();
     }
 
-    // Handle shift difficulty button actions in column lists
-    function shiftDifficultyLevel(chapter, currentLevel) {
-      const nextMap = { 'Easy': 'Medium', 'Medium': 'Hard', 'Hard': 'Easy' };
-      const nextLevel = nextMap[currentLevel];
-      chapterDifficulty[chapter] = nextLevel;
-      saveState();
-      refreshDashboard();
-      showToast(`Moved "${chapter}" difficulty index to ${nextLevel}.`, "cyan");
-    }
-
-    /* Notification Alerts */
+    /* Notification Toasts */
     function showToast(message, type = "cyan") {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
