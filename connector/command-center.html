@@ -56,62 +56,45 @@
     </div>
   </div>
 
-  <!-- Unified Technical Header -->
-  <header class="border-b border-zinc-800 bg-zinc-950/90 sticky top-0 z-40 text-xs">
-    <!-- Upper Strip: Brand & Profile Control -->
-    <div class="border-b border-zinc-900 bg-zinc-900/40">
-      <div class="max-w-7xl mx-auto px-4 py-2.5 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
-        <!-- Logo & Status -->
-        <div class="flex items-center gap-2">
-          <span class="text-cyan-400"><i data-lucide="terminal" class="w-4 h-4"></i></span>
-          <span class="font-bold tracking-widest uppercase text-zinc-200">MPC_PREP_COMMAND</span>
-          <span class="text-[9px] text-zinc-500 px-1 border border-zinc-800 bg-zinc-950 rounded">V3.0</span>
+  <!-- Minimal Header -->
+  <header class="border-b border-zinc-800 bg-zinc-900/80 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      
+      <!-- Logo Branding -->
+      <div class="flex items-center gap-2.5">
+        <div class="p-1.5 bg-cyan-500/10 border border-cyan-500/30 rounded text-cyan-400">
+          <i data-lucide="terminal" class="w-5 h-5"></i>
         </div>
-        <!-- Profile Quick Action Area -->
-        <div class="flex items-center gap-2">
-          <div class="flex items-center gap-1.5 text-zinc-400">
-            <i data-lucide="user" class="w-3.5 h-3.5 text-cyan-500/80"></i>
-            <span class="text-[10px] text-zinc-500 uppercase">User:</span>
-            <span id="active-user-display" class="font-bold text-cyan-400">GUEST</span>
-          </div>
-          <span class="text-zinc-800 font-bold">|</span>
-          <!-- Control Buttons -->
-          <button onclick="switchProfile()" class="text-zinc-500 hover:text-cyan-400 transition" title="Switch Profile">
-            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-          </button>
-          <button onclick="resetAllData()" class="text-zinc-500 hover:text-red-400 transition ml-1" title="Wipe Session Data">
-            <i data-lucide="power" class="w-3.5 h-3.5"></i>
-          </button>
+        <div>
+          <h1 class="text-sm font-bold tracking-widest uppercase text-zinc-100 flex items-center gap-2">
+            MPC_PREP_COMMAND // <span class="text-cyan-400 text-xs">V3.0-PRECISION</span>
+          </h1>
+          <p class="text-[10px] text-zinc-500">User Profile Segregated Interface</p>
         </div>
       </div>
-    </div>
-
-    <!-- Lower Strip: Navigation & Session Indicators -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col md:flex-row items-center justify-between gap-3">
-      <!-- Navigation Tabs -->
-      <nav class="flex items-center gap-5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 custom-scrollbar">
-        <a href="../index.html" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
-          <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i> Portal Home
-        </a>
-        <a href="./command-center.html" class="text-cyan-400 border-b border-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5 font-bold">
-          <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Command Center
-        </a>
-        <a href="./mock-analyzer.html" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
-          <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Mock Analyzer
-        </a>
-        <a href="https://sandeshbanala0811.github.io/jee-formula-vault/index.html" target="_blank" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
-          <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Formula Vault
-        </a>
-      </nav>
-
-      <!-- Dynamic Micro-Metrics -->
-      <div class="flex items-center gap-4 text-[10px] text-zinc-500 font-semibold uppercase tracking-wider shrink-0 w-full md:w-auto justify-end border-t border-zinc-900/50 md:border-none pt-2 md:pt-0">
-        <span class="flex items-center gap-1 bg-zinc-950 px-2 py-1 rounded border border-zinc-900">
-          Total Time: <span id="total-hours-header" class="font-bold text-cyan-400">0.0 HRS</span>
-        </span>
-        <span class="flex items-center gap-1 bg-zinc-950 px-2 py-1 rounded border border-zinc-900">
-          Distractions: <span id="total-distractions-header" class="font-bold text-amber-400">0</span>
-        </span>
+      
+      <!-- Metrics & User Info Bar -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Active User Badge -->
+        <div class="border border-cyan-500/20 bg-cyan-950/20 px-3 py-1.5 rounded flex items-center gap-2">
+          <i data-lucide="user" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span id="active-user-display" class="text-xs font-bold text-cyan-400">GUEST</span>
+        </div>
+        <!-- Switch Profile Button -->
+        <button onclick="switchProfile()" class="p-1.5 text-zinc-500 hover:text-cyan-400 hover:bg-zinc-900 rounded border border-zinc-800 transition" title="Switch User Profile">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+        <div class="border border-zinc-800 bg-zinc-950 px-3 py-1.5 rounded flex items-center gap-2">
+          <span class="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Duration</span>
+          <span id="total-hours-header" class="text-xs font-bold text-cyan-400">0.0 HRS</span>
+        </div>
+        <div class="border border-zinc-800 bg-zinc-950 px-3 py-1.5 rounded flex items-center gap-2">
+          <span class="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Distractions</span>
+          <span id="total-distractions-header" class="text-xs font-bold text-amber-400">0</span>
+        </div>
+        <button onclick="resetAllData()" class="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-zinc-900 rounded border border-zinc-800 transition" title="Reset Current User Data">
+          <i data-lucide="power" class="w-4 h-4"></i>
+        </button>
       </div>
     </div>
   </header>
@@ -126,7 +109,7 @@
       <!-- LEFT WORKSPACE: Focus Timer & Unified Logger (Spans 5 Cols) -->
       <div class="lg:col-span-5 space-y-6">
         
-        <!-- Interactive Focus Console -->
+        <!-- Interactive Focus Console (High-Precision Delta Design) -->
         <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded relative overflow-hidden">
           <div class="flex justify-between items-center mb-4 border-b border-zinc-800 pb-2">
             <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
@@ -290,7 +273,7 @@
                 <span id="physics-hours-txt" class="text-amber-500">0.0h</span>
               </div>
               <div class="w-full bg-zinc-900 h-1 rounded-full overflow-hidden">
-                <div id="math-hours-bar" class="bg-amber-500 h-full w-0 transition-all duration-300"></div>
+                <div id="physics-hours-bar" class="bg-amber-500 h-full w-0 transition-all duration-300"></div>
               </div>
             </div>
 
@@ -390,7 +373,7 @@
   </footer>
 
   <script>
-    // Master Syllabus Dictionary
+    // Complete Verified JEE & BIE Syllabus Database
     const SYLLABUS_DATA = {
       "Mathematics": [
         "Sets, Relations & Functions",
@@ -484,13 +467,13 @@
         "Electrochemistry",
         "Chemical Kinetics",
         "Surface Chemistry",
-        "General Principles and Isolation of Elements (Metallurgy)",
+        "General Principles and Processes of Isolation of Elements (Metallurgy)",
         "p-Block Elements: Group 15, 16, 17 & 18",
         "d and f Block Elements",
         "Coordination Compounds & Organometallics",
         "Haloalkanes and Haloarenes",
         "Alcohols, Phenols and Ethers",
-        "Aldehydes, Kidneys and Carboxylic Acids",
+        "Aldehydes, Ketones and Carboxylic Acids",
         "Organic Compounds Containing Nitrogen (Amines & Diazonium Salts)",
         "Biomolecules",
         "Polymers",
@@ -500,18 +483,20 @@
     };
 
     // Active Profile Handle State
-    let activeUser = localStorage.getItem('mpc_v3_user') || "";
+    let activeUser = localStorage.getItem('mpc_active_user') || "";
 
     // Local profile variables
     let logs = [];
     let chapterPillars = {};
     let chapterDifficulty = {};
 
-    // Live Timer Controls State
+    // Live Timer Controls State (High-Precision Delta Fields)
     let timerSeconds = 0;
     let timerInterval = null;
     let timerRunning = false;
     let distractionsTally = 0;
+    let timerStartTime = null;
+    let accumulatedMs = 0;
 
     let selectedDifficultyLevel = "";
 
@@ -543,9 +528,9 @@
 
     // Load state tied specifically to active handle
     function loadUserProfileData() {
-      logs = JSON.parse(localStorage.getItem(`mpc_v3_logs_${activeUser}`)) || [];
-      chapterPillars = JSON.parse(localStorage.getItem(`mpc_v3_pillars_${activeUser}`)) || {};
-      chapterDifficulty = JSON.parse(localStorage.getItem(`mpc_v3_difficulty_${activeUser}`)) || {};
+      logs = JSON.parse(localStorage.getItem(`mpc_v2_logs_${activeUser}`)) || [];
+      chapterPillars = JSON.parse(localStorage.getItem(`mpc_v2_pillars_${activeUser}`)) || {};
+      chapterDifficulty = JSON.parse(localStorage.getItem(`mpc_v2_difficulty_${activeUser}`)) || {};
       refreshDashboard();
     }
 
@@ -557,7 +542,7 @@
       // Enforce clean formatting constraints
       if (/^[a-zA-Z0-9_\-]+$/.test(rawUser)) {
         activeUser = rawUser;
-        localStorage.setItem('mpc_v3_user', activeUser);
+        localStorage.setItem('mpc_active_user', activeUser);
         verifyProfileSession();
         showToast(`Profile "${activeUser}" loaded.`, "cyan");
       } else {
@@ -572,7 +557,7 @@
       resetForm();
       
       activeUser = "";
-      localStorage.removeItem('mpc_v3_user');
+      localStorage.removeItem('mpc_active_user');
       document.getElementById('profile-input').value = "";
       verifyProfileSession();
     }
@@ -621,7 +606,7 @@
       document.getElementById('focus-rating-display').innerText = ratingDescriptions[val] || `${val} // Rated`;
     }
 
-    /* Live Focus Timer controls */
+    /* Live Focus Timer controls (High-Precision Delta Fix) */
     function toggleTimer() {
       const btnPrimary = document.getElementById('btn-timer-primary');
       const textPrimary = document.getElementById('timer-text-primary');
@@ -637,10 +622,15 @@
         document.getElementById('timer-icon-primary').setAttribute('data-lucide', 'pause');
         lucide.createIcons();
 
+        // Lock in real clock start timestamp
+        timerStartTime = Date.now();
+
         timerInterval = setInterval(() => {
-          timerSeconds++;
+          const currentElapsedMs = Date.now() - timerStartTime;
+          const totalElapsedMs = accumulatedMs + currentElapsedMs;
+          timerSeconds = Math.floor(totalElapsedMs / 1000);
           updateTimerDisplay();
-        }, 1000);
+        }, 100);
       } else {
         timerRunning = false;
         btnPrimary.className = "py-2 px-3 bg-cyan-600 hover:bg-cyan-500 text-black font-bold rounded text-xs uppercase flex items-center justify-center gap-1.5 transition";
@@ -652,6 +642,12 @@
         lucide.createIcons();
 
         clearInterval(timerInterval);
+
+        // Save accumulated milliseconds of current run block
+        if (timerStartTime) {
+          accumulatedMs += (Date.now() - timerStartTime);
+        }
+        timerStartTime = null;
       }
     }
 
@@ -659,6 +655,8 @@
       clearInterval(timerInterval);
       timerRunning = false;
       timerSeconds = 0;
+      timerStartTime = null;
+      accumulatedMs = 0;
       distractionsTally = 0;
       updateTimerDisplay();
       document.getElementById('distraction-counter-badge').innerText = '0';
@@ -689,15 +687,28 @@
     }
 
     function finishAndTransferSession() {
-      if (timerSeconds < 5) {
+      let currentMins = 0;
+      
+      // Read precise elapsed time even if in a running state
+      if (timerRunning && timerStartTime) {
+        const currentElapsedMs = Date.now() - timerStartTime;
+        const totalElapsedMs = accumulatedMs + currentElapsedMs;
+        const tempSecs = Math.floor(totalElapsedMs / 1000);
+        currentMins = Math.max(1, Math.round(tempSecs / 60));
+      } else {
+        currentMins = Math.max(1, Math.round(timerSeconds / 60));
+      }
+
+      const totalCalculatedMs = accumulatedMs + (timerRunning && timerStartTime ? (Date.now() - timerStartTime) : 0);
+      if (timerSeconds < 5 && totalCalculatedMs < 5000) {
         showToast("Session duration too low to sync.", "rose");
         return;
       }
-      const rawMins = Math.max(1, Math.round(timerSeconds / 60));
-      document.getElementById('log-time').value = rawMins;
+
+      document.getElementById('log-time').value = currentMins;
       document.getElementById('log-distractions').value = distractionsTally;
 
-      showToast(`Synced ${rawMins}M and ${distractionsTally} distractions. Complete form entries to save.`, "cyan");
+      showToast(`Synced ${currentMins}M and ${distractionsTally} distractions. Complete form entries to save.`, "cyan");
       if (timerRunning) toggleTimer();
     }
 
@@ -763,16 +774,6 @@
       updateFocusRatingDisplay(3);
     }
 
-    // Handle shift difficulty button actions in column lists
-    function shiftDifficultyLevel(chapter, currentLevel) {
-      const nextMap = { 'Easy': 'Medium', 'Medium': 'Hard', 'Hard': 'Easy' };
-      const nextLevel = nextMap[currentLevel];
-      chapterDifficulty[chapter] = nextLevel;
-      saveState();
-      refreshDashboard();
-      showToast(`Moved "${chapter}" difficulty index to ${nextLevel}.`, "cyan");
-    }
-
     function deleteLogRecord(id) {
       logs = logs.filter(log => log.id !== id);
       saveState();
@@ -782,17 +783,17 @@
 
     function saveState() {
       if (!activeUser) return;
-      localStorage.setItem(`mpc_v3_logs_${activeUser}`, JSON.stringify(logs));
-      localStorage.setItem(`mpc_v3_pillars_${activeUser}`, JSON.stringify(chapterPillars));
-      localStorage.setItem(`mpc_v3_difficulty_${activeUser}`, JSON.stringify(chapterDifficulty));
+      localStorage.setItem(`mpc_v2_logs_${activeUser}`, JSON.stringify(logs));
+      localStorage.setItem(`mpc_v2_pillars_${activeUser}`, JSON.stringify(chapterPillars));
+      localStorage.setItem(`mpc_v2_difficulty_${activeUser}`, JSON.stringify(chapterDifficulty));
     }
 
     function resetAllData() {
       if (!activeUser) return;
-      if (confirm(`Clear all logs and metrics registered under active profile "${activeUser}"?`)) {
-        localStorage.removeItem(`mpc_v3_logs_${activeUser}`);
-        localStorage.removeItem(`mpc_v3_pillars_${activeUser}`);
-        localStorage.removeItem(`mpc_v3_difficulty_${activeUser}`);
+      if (confirm(`Wipe all logs and metrics registered under active profile "${activeUser}"?`)) {
+        localStorage.removeItem(`mpc_v2_logs_${activeUser}`);
+        localStorage.removeItem(`mpc_v2_pillars_${activeUser}`);
+        localStorage.removeItem(`mpc_v2_difficulty_${activeUser}`);
         
         logs = [];
         chapterPillars = {};
@@ -972,7 +973,7 @@
             </div>
             <div class="flex items-center gap-2">
               <span class="text-[8px] text-zinc-600">${formattedTime}</span>
-              <button onclick="deleteLogRecord('${record.id}')" class="text-zinc-600 hover:text-red-400 p-1 transition" title="Delete record">
+              <button onclick="deleteLogRecord('${record.id}')" class="text-zinc-600 hover:text-red-400 p-1 transition" title="Delete log">
                 <i data-lucide="trash" class="w-3.5 h-3.5"></i>
               </button>
             </div>
@@ -984,7 +985,17 @@
       lucide.createIcons();
     }
 
-    /* Notification Toasts */
+    // Handle shift difficulty button actions in column lists
+    function shiftDifficultyLevel(chapter, currentLevel) {
+      const nextMap = { 'Easy': 'Medium', 'Medium': 'Hard', 'Hard': 'Easy' };
+      const nextLevel = nextMap[currentLevel];
+      chapterDifficulty[chapter] = nextLevel;
+      saveState();
+      refreshDashboard();
+      showToast(`Moved "${chapter}" difficulty index to ${nextLevel}.`, "cyan");
+    }
+
+    /* Notification Alerts */
     function showToast(message, type = "cyan") {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
