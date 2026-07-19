@@ -8,6 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     /* Custom technical scrollbar styling */
     .custom-scrollbar::-webkit-scrollbar {
@@ -37,18 +39,39 @@
         </div>
         <div>
           <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-100">Guardian Authentication</h2>
-          <p class="text-[10px] text-zinc-500">Access your local test & backlog databases</p>
+          <p class="text-[10px] text-zinc-500">Access your local or cloud database partition</p>
         </div>
       </div>
       
-      <form onsubmit="handleProfileSelection(event)" class="space-y-4">
+      <!-- Database Mode Selector -->
+      <div class="grid grid-cols-2 gap-2 mb-4">
+        <button onclick="toggleLoginMode('local')" id="btn-mode-local" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
+          Browser Storage
+        </button>
+        <button onclick="toggleLoginMode('cloud')" id="btn-mode-cloud" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-zinc-800 bg-zinc-950/45 text-zinc-500 hover:border-zinc-700">
+          Supabase Cloud
+        </button>
+      </div>
+
+      <form onsubmit="handleProfileSelection(event)" class="space-y-4 text-xs">
+        <!-- Username input -->
         <div>
-          <label for="profile-input" class="block text-[10px] uppercase font-bold text-zinc-500 mb-2">Username Profile</label>
-          <input type="text" id="profile-input" required placeholder="e.g., Arjun_JEE" pattern="^[a-zA-Z0-9_\-]+$" title="Alphanumeric, underscores, or hyphens only." class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 text-xs transition">
-          <p class="text-[9px] text-zinc-500 mt-1.5 leading-normal">
-            Enter a handle to isolate your exam trends and backlog alerts on this browser.
-          </p>
+          <label for="profile-input" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Username Profile</label>
+          <input type="text" id="profile-input" required placeholder="e.g., Arjun_JEE" pattern="^[a-zA-Z0-9_\-]+$" title="Alphanumeric, underscores, or hyphens only." class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
         </div>
+
+        <!-- Supabase Credentials (Visible only in cloud mode) -->
+        <div id="cloud-credentials-fields" class="hidden space-y-3 pt-2 border-t border-zinc-800/80">
+          <div>
+            <label for="supabase-url" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Supabase URL</label>
+            <input type="url" id="supabase-url" placeholder="https://yourproject.supabase.co" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
+          </div>
+          <div>
+            <label for="supabase-key" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Supabase Anon Key</label>
+            <input type="password" id="supabase-key" placeholder="your-anon-public-api-key" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
+          </div>
+        </div>
+
         <button type="submit" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold uppercase rounded text-xs transition">
           Access Registry
         </button>
@@ -67,7 +90,7 @@
         </div>
         <div>
           <h1 class="text-sm font-bold tracking-widest uppercase text-zinc-100 flex items-center gap-2">
-            MOCK_ANALYZER // <span class="text-cyan-400 text-xs">V1.4</span>
+            MOCK_ANALYZER // <span id="app-mode-badge" class="text-cyan-400 text-xs">OFFLINE</span>
           </h1>
           <p class="text-[10px] text-zinc-500">JEE Revision Decay & Analytics Suite</p>
         </div>
@@ -426,7 +449,7 @@
         "Electrochemistry",
         "Chemical Kinetics",
         "Surface Chemistry",
-        "General Principles and Isolation of Elements (Metallurgy)",
+        "General Principles and Processes of Isolation of Elements (Metallurgy)",
         "p-Block Elements: Group 15, 16, 17 & 18",
         "d and f Block Elements",
         "Coordination Compounds & Organometallics",
@@ -441,11 +464,19 @@
       ]
     };
 
-    // User State Management variables
+    // Client State 
     let activeUser = localStorage.getItem('mpc_companion_user') || "";
+    let loginMode = "local"; // "local" or "cloud"
+    
+    // Cloud Credentials Cache
+    let cloudUrl = localStorage.getItem('mpc_companion_url') || "";
+    let cloudKey = localStorage.getItem('mpc_companion_key') || "";
+    
+    // Database SDK Client
+    let supabase = null;
+
     let mockTests = [];
     let checkpoints = [];
-
     let selectedDiff = "";
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -499,30 +530,101 @@
       return label;
     }
 
+    // Toggle Login Panel tab modes
+    function toggleLoginMode(mode) {
+      loginMode = mode;
+      const btnLocal = document.getElementById('btn-mode-local');
+      const btnCloud = document.getElementById('btn-mode-cloud');
+      const cloudFields = document.getElementById('cloud-credentials-fields');
+
+      if (mode === 'cloud') {
+        btnCloud.className = "flex-1 py-1.5 text-center text-[10px] font-bold rounded uppercase border border-cyan-500/30 bg-cyan-500/10 text-cyan-400";
+        btnLocal.className = "flex-1 py-1.5 text-center text-[10px] font-bold rounded uppercase border border-zinc-800 bg-zinc-950/45 text-zinc-500 hover:border-zinc-700";
+        cloudFields.classList.remove('hidden');
+        
+        // Autocomplete if cached credentials exist
+        document.getElementById('supabase-url').value = cloudUrl;
+        document.getElementById('supabase-key').value = cloudKey;
+      } else {
+        btnLocal.className = "flex-1 py-1.5 text-center text-[10px] font-bold rounded uppercase border border-cyan-500/30 bg-cyan-500/10 text-cyan-400";
+        btnCloud.className = "flex-1 py-1.5 text-center text-[10px] font-bold rounded uppercase border border-zinc-800 bg-zinc-950/45 text-zinc-500 hover:border-zinc-700";
+        cloudFields.classList.add('hidden');
+      }
+    }
+
     // Profile Modal authentication verification
     function verifyProfileSession() {
       const modal = document.getElementById('profile-modal');
       if (!activeUser) {
         modal.classList.remove('hidden');
+        // Default select previous setup state
+        if (cloudUrl && cloudKey) {
+          toggleLoginMode('cloud');
+        }
       } else {
         modal.classList.add('hidden');
         document.getElementById('active-user-display').innerText = activeUser.toUpperCase();
-        loadProfileDatabases();
+        
+        // Attempt cloud connection if parameters are available
+        initDatabaseConnection();
       }
+    }
+
+    function initDatabaseConnection() {
+      cloudUrl = localStorage.getItem('mpc_companion_url') || "";
+      cloudKey = localStorage.getItem('mpc_companion_key') || "";
+      
+      const modeBadge = document.getElementById('app-mode-badge');
+
+      if (cloudUrl && cloudKey) {
+        try {
+          supabase = supabaseJS.createClient(cloudUrl, cloudKey);
+          modeBadge.innerText = "CLOUD";
+          modeBadge.className = "text-emerald-400 text-xs";
+        } catch (err) {
+          console.error("Supabase config error:", err);
+          supabase = null;
+          modeBadge.innerText = "OFFLINE";
+          modeBadge.className = "text-cyan-400 text-xs";
+        }
+      } else {
+        supabase = null;
+        modeBadge.innerText = "OFFLINE";
+        modeBadge.className = "text-cyan-400 text-xs";
+      }
+      
+      loadProfileDatabases();
     }
 
     function handleProfileSelection(e) {
       e.preventDefault();
       const userValue = document.getElementById('profile-input').value.trim();
 
-      if (/^[a-zA-Z0-9_\-]+$/.test(userValue)) {
-        activeUser = userValue;
-        localStorage.setItem('mpc_companion_user', activeUser);
-        verifyProfileSession();
-        showToast(`Authorized: ${activeUser}`, "cyan");
-      } else {
+      if (!/^[a-zA-Z0-9_\-]+$/.test(userValue)) {
         showToast("Invalid handle. Use alphanumeric characters only.", "rose");
+        return;
       }
+
+      if (loginMode === 'cloud') {
+        const urlInput = document.getElementById('supabase-url').value.trim();
+        const keyInput = document.getElementById('supabase-key').value.trim();
+
+        if (!urlInput || !keyInput) {
+          showToast("Cloud parameters cannot be empty.", "rose");
+          return;
+        }
+
+        localStorage.setItem('mpc_companion_url', urlInput);
+        localStorage.setItem('mpc_companion_key', keyInput);
+      } else {
+        // Clear cached credentials if logging in local-only
+        localStorage.removeItem('mpc_companion_url');
+        localStorage.removeItem('mpc_companion_key');
+      }
+
+      activeUser = userValue;
+      localStorage.setItem('mpc_companion_user', activeUser);
+      verifyProfileSession();
     }
 
     function switchProfile() {
@@ -532,11 +634,61 @@
       verifyProfileSession();
     }
 
-    // Load active partition datasets
-    function loadProfileDatabases() {
+    // Dynamic Loader: Cloud or Fallback Local Partition
+    async function loadProfileDatabases() {
+      if (supabase) {
+        showToast("Synchronizing with Cloud DB...", "cyan");
+        try {
+          const { data: testData, error: tErr } = await supabase
+            .from('mpc_mock_tests')
+            .select('*')
+            .eq('username', activeUser)
+            .order('created_at', { ascending: false });
+
+          const { data: cpData, error: cErr } = await supabase
+            .from('mpc_checkpoints')
+            .select('*')
+            .eq('username', activeUser);
+
+          if (tErr || cErr) throw (tErr || cErr);
+
+          mockTests = (testData || []).map(t => ({
+            id: t.id,
+            name: t.name,
+            maxMarks: t.max_marks,
+            maths: t.maths,
+            phys: t.phys,
+            chem: t.chem,
+            total: t.total,
+            date: t.date,
+            mathsChapters: t.maths_chapters || [],
+            physicsChapters: t.physics_chapters || [],
+            chemistryChapters: t.chemistry_chapters || []
+          }));
+
+          checkpoints = (cpData || []).map(c => ({
+            id: c.id,
+            subject: c.subject,
+            chapter: c.chapter,
+            confidence: c.confidence,
+            date: c.date
+          }));
+
+          showToast("Cloud Sync Successful", "emerald");
+        } catch (err) {
+          console.warn("Cloud connection error. Loading local browser data:", err);
+          showToast("Cloud Sync Error. Falling back locally.", "rose");
+          loadLocalBackup();
+        }
+      } else {
+        loadLocalBackup();
+      }
+      refreshDashboard();
+    }
+
+    function loadLocalBackup() {
       mockTests = JSON.parse(localStorage.getItem(`mpc_companion_tests_${activeUser}`)) || [];
       checkpoints = JSON.parse(localStorage.getItem(`mpc_companion_revisions_${activeUser}`)) || [];
-      refreshDashboard();
     }
 
     // Populate Dynamic Cascading Chapter Selector
@@ -577,8 +729,8 @@
       });
     }
 
-    /* Form Submissions */
-    function handleMockSubmit(e) {
+    /* Operations Writers */
+    async function handleMockSubmit(e) {
       e.preventDefault();
 
       const name = document.getElementById('mock-name').value.trim();
@@ -588,7 +740,6 @@
       const chem = parseInt(document.getElementById('mock-chem').value, 10);
       const date = document.getElementById('mock-date').value;
 
-      // Extract Arrays of Checked Chapters
       const mathsChapters = Array.from(document.querySelectorAll('input[name="math-ch"]:checked')).map(el => el.value);
       const physicsChapters = Array.from(document.querySelectorAll('input[name="phys-ch"]:checked')).map(el => el.value);
       const chemistryChapters = Array.from(document.querySelectorAll('input[name="chem-ch"]:checked')).map(el => el.value);
@@ -615,7 +766,34 @@
       };
 
       mockTests.unshift(mockEntry);
-      saveState();
+      
+      // Save local backup anyway for robustness
+      localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
+
+      // Push to Supabase if available
+      if (supabase) {
+        const { error } = await supabase
+          .from('mpc_mock_tests')
+          .insert({
+            id: mockEntry.id,
+            username: activeUser,
+            name: mockEntry.name,
+            max_marks: mockEntry.maxMarks,
+            maths: mockEntry.maths,
+            phys: mockEntry.phys,
+            chem: mockEntry.chem,
+            total: mockEntry.total,
+            date: mockEntry.date,
+            maths_chapters: mockEntry.mathsChapters,
+            physics_chapters: mockEntry.physicsChapters,
+            chemistry_chapters: mockEntry.chemistryChapters
+          });
+        if (error) {
+          console.error("Cloud Error:", error);
+          showToast("Written locally. Cloud synchronization error.", "amber");
+        }
+      }
+
       refreshDashboard();
 
       // Reset checkboxes & form
@@ -626,7 +804,7 @@
       showToast("Mock score registered.", "emerald");
     }
 
-    function handleCheckpointSubmit(e) {
+    async function handleCheckpointSubmit(e) {
       e.preventDefault();
 
       const subject = document.getElementById('subject-select-cp').value;
@@ -647,14 +825,40 @@
         date
       };
 
-      // Filter out duplicate checkpoints to track strictly latest progress per chapter
+      // Filter local state duplicates
       checkpoints = checkpoints.filter(cp => cp.chapter !== chapter);
-
       checkpoints.unshift(checkpointEntry);
-      saveState();
+      localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
+
+      // Push to Cloud
+      if (supabase) {
+        // Delete older database chapter entries to keep strictly latest record
+        await supabase
+          .from('mpc_checkpoints')
+          .delete()
+          .eq('username', activeUser)
+          .eq('chapter', chapter);
+
+        const { error } = await supabase
+          .from('mpc_checkpoints')
+          .insert({
+            id: checkpointEntry.id,
+            username: activeUser,
+            subject: checkpointEntry.subject,
+            chapter: checkpointEntry.chapter,
+            confidence: checkpointEntry.confidence,
+            date: checkpointEntry.date
+          });
+        
+        if (error) {
+          console.error("Cloud write error:", error);
+          showToast("Saved locally. Cloud synchronization issues.", "amber");
+        }
+      }
+
       refreshDashboard();
 
-      // Reset Form fields
+      // Reset fields
       document.getElementById('checkpoint-form').reset();
       document.getElementById('chapter-select-cp').disabled = true;
       document.getElementById('chapter-select-cp').innerHTML = '<option value="" disabled selected>Select Subject first</option>';
@@ -670,41 +874,39 @@
       showToast("Revision checkpoint registered.", "emerald");
     }
 
-    function deleteMockRecord(id) {
+    async function deleteMockRecord(id) {
       mockTests = mockTests.filter(t => t.id !== id);
-      saveState();
+      localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
+
+      if (supabase) {
+        const { error } = await supabase.from('mpc_mock_tests').delete().eq('id', id);
+        if (error) console.error("Cloud deletion issues:", error);
+      }
+
       refreshDashboard();
       showToast("Mock record cleared.", "rose");
     }
 
-    function deleteCheckpointRecord(id) {
+    async function deleteCheckpointRecord(id) {
+      const target = checkpoints.find(c => c.id === id);
       checkpoints = checkpoints.filter(c => c.id !== id);
-      saveState();
+      localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
+
+      if (supabase && target) {
+        const { error } = await supabase
+          .from('mpc_checkpoints')
+          .delete()
+          .eq('id', id);
+        if (error) console.error("Cloud deletion issues:", error);
+      }
+
       refreshDashboard();
       showToast("Checkpoint record cleared.", "rose");
     }
 
-    function saveState() {
-      if (!activeUser) return;
-      localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
-      localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
-    }
-
-    function resetAllData() {
-      if (!activeUser) return;
-      if (confirm(`Wipe mock scores and revision benchmarks under "${activeUser}"?`)) {
-        localStorage.removeItem(`mpc_companion_tests_${activeUser}`);
-        localStorage.removeItem(`mpc_companion_revisions_${activeUser}`);
-        mockTests = [];
-        checkpoints = [];
-        refreshDashboard();
-        showToast("Database reset.", "rose");
-      }
-    }
-
-    /* Core Layout Refresh & Calculations */
+    /* Calculations & Board Sync */
     function refreshDashboard() {
-      // 1. Calculate and update Subject-Wise average scores
+      // 1. Calculate Average Score Accuracy Percentage
       let mathSumPct = 0, physSumPct = 0, chemSumPct = 0;
       let totalTestsCount = mockTests.length;
 
@@ -735,7 +937,7 @@
         });
       }
 
-      // 2. Populate Mock Test History ledger
+      // 2. Populate Ledger list
       const testLedger = document.getElementById('mock-test-ledger');
       if (mockTests.length === 0) {
         testLedger.innerHTML = '<p class="text-[10px] text-zinc-600 text-center py-12">No recorded mock exams registered.</p>';
@@ -744,8 +946,6 @@
         mockTests.forEach(test => {
           const pct = Math.round((test.total / test.maxMarks) * 100);
           const colorMarker = pct >= 75 ? 'border-l-emerald-500' : pct >= 50 ? 'border-l-amber-500' : 'border-l-red-500';
-
-          // Count total tested chapters across this exam
           const totalChapsLogged = (test.mathsChapters?.length || 0) + (test.physicsChapters?.length || 0) + (test.chemistryChapters?.length || 0);
 
           const card = document.createElement('div');
@@ -772,7 +972,7 @@
         });
       }
 
-      // 3. Process Revision Decay & Alerts (Watchdog Logic)
+      // 3. Process Warnings & decay
       const alertsFeed = document.getElementById('backlog-alerts-feed');
       alertsFeed.innerHTML = '';
 
@@ -780,7 +980,6 @@
       let urgentCount = 0;
       let decayWarningsList = [];
 
-      // Create mapping of the latest checkpoint dates for resolution validation
       const latestCheckpointDate = {};
       checkpoints.forEach(cp => {
         if (!latestCheckpointDate[cp.chapter]) {
@@ -788,18 +987,16 @@
         }
       });
 
-      // Part A: Process Mock Exam < 60% Failure Backlogs (Multi-select check)
+      // Part A: Process Mock Exam < 60% failures
       mockTests.forEach(test => {
         const testDate = new Date(test.date);
         const maxSubMarks = test.maxMarks / 3;
 
-        // Verify Mathematics score on all tested Math chapters
         if (test.mathsChapters && test.mathsChapters.length > 0) {
           const mathPct = Math.round((test.maths / maxSubMarks) * 100);
           if (mathPct < 60) {
             test.mathsChapters.forEach(chap => {
               const lastRevised = latestCheckpointDate[chap];
-              // Trigger alert if never revised, or if revised before the exam date
               if (!lastRevised || lastRevised < testDate) {
                 decayWarningsList.push({
                   chapter: chap,
@@ -814,7 +1011,6 @@
           }
         }
 
-        // Verify Physics score on all tested Phys chapters
         if (test.physicsChapters && test.physicsChapters.length > 0) {
           const physPct = Math.round((test.phys / maxSubMarks) * 100);
           if (physPct < 60) {
@@ -834,7 +1030,6 @@
           }
         }
 
-        // Verify Chemistry score on all tested Chem chapters
         if (test.chemistryChapters && test.chemistryChapters.length > 0) {
           const chemPct = Math.round((test.chem / maxSubMarks) * 100);
           if (chemPct < 60) {
@@ -875,7 +1070,6 @@
         }
 
         if (conditionMet) {
-          // Prevent duplicates if already marked as an exam failure backlog
           const exists = decayWarningsList.some(item => item.chapter === cp.chapter);
           if (!exists) {
             decayWarningsList.push({
@@ -900,7 +1094,6 @@
           </div>
         `;
       } else {
-        // Sort most severe decay first
         decayWarningsList.sort((a, b) => b.days - a.days);
         decayWarningsList.forEach(item => {
           const warnCard = document.createElement('div');
@@ -920,7 +1113,7 @@
         });
       }
 
-      // 4. Populate Checkpoint Ledger
+      // Populate Checkpoint Ledger
       const checkpointLedger = document.getElementById('checkpoint-ledger');
       if (checkpoints.length === 0) {
         checkpointLedger.innerHTML = '<p class="text-[10px] text-zinc-600 text-center py-12">No registered revision checkpoints found.</p>';
@@ -993,3 +1186,5 @@
   </style>
 </body>
 </html>
+
+--- END OF FILE Paste ---
