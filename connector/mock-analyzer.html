@@ -79,39 +79,59 @@
     </div>
   </div>
 
-  <!-- Header -->
-  <header class="border-b border-zinc-800 bg-zinc-900/80 sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-      
-      <!-- Brand -->
-      <div class="flex items-center gap-2.5">
-        <div class="p-1.5 bg-cyan-500/10 border border-cyan-500/30 rounded text-cyan-400">
-          <i data-lucide="shield-alert" class="w-5 h-5"></i>
+  <!-- Unified Technical Header (Synced with Command Center) -->
+  <header class="border-b border-zinc-800 bg-zinc-950/90 sticky top-0 z-40 text-xs">
+    <!-- Upper Strip: Brand & Profile Control -->
+    <div class="border-b border-zinc-900 bg-zinc-900/40">
+      <div class="max-w-7xl mx-auto px-4 py-2.5 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+        <!-- Logo & Status -->
+        <div class="flex items-center gap-2">
+          <span class="text-cyan-400"><i data-lucide="shield-alert" class="w-4 h-4"></i></span>
+          <span class="font-bold tracking-widest uppercase text-zinc-200">MPC_MOCK_ANALYZER</span>
+          <span id="app-mode-badge" class="text-[9px] text-cyan-400 px-1 border border-cyan-500/20 bg-cyan-950/20 rounded">OFFLINE</span>
         </div>
-        <div>
-          <h1 class="text-sm font-bold tracking-widest uppercase text-zinc-100 flex items-center gap-2">
-            MOCK_ANALYZER // <span id="app-mode-badge" class="text-cyan-400 text-xs">OFFLINE</span>
-          </h1>
-          <p class="text-[10px] text-zinc-500">JEE Revision Decay & Analytics Suite</p>
+        <!-- Profile Quick Action Area -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 text-zinc-400">
+            <i data-lucide="user" class="w-3.5 h-3.5 text-cyan-500/80"></i>
+            <span class="text-[10px] text-zinc-500 uppercase">User:</span>
+            <span id="active-user-display" class="font-bold text-cyan-400">GUEST</span>
+          </div>
+          <span class="text-zinc-800 font-bold">|</span>
+          <!-- Control Buttons -->
+          <button onclick="switchProfile()" class="text-zinc-500 hover:text-cyan-400 transition" title="Switch Profile">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+          <button onclick="resetAllData()" class="text-zinc-500 hover:text-red-400 transition ml-1" title="Wipe Session Data">
+            <i data-lucide="power" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
       </div>
-      
-      <!-- Profile & Global Stats -->
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="border border-cyan-500/20 bg-cyan-950/20 px-3 py-1.5 rounded flex items-center gap-2">
-          <i data-lucide="user" class="w-3.5 h-3.5 text-cyan-400"></i>
-          <span id="active-user-display" class="text-xs font-bold text-cyan-400">GUEST</span>
-        </div>
-        <button onclick="switchProfile()" class="p-1.5 text-zinc-500 hover:text-cyan-400 hover:bg-zinc-900 rounded border border-zinc-800 transition" title="Change Profile">
-          <i data-lucide="log-out" class="w-4 h-4"></i>
-        </button>
-        <div class="border border-zinc-800 bg-zinc-950 px-3 py-1.5 rounded flex items-center gap-2">
-          <span class="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Backlogs</span>
-          <span id="global-backlog-count" class="text-xs font-bold text-red-400">0</span>
-        </div>
-        <button onclick="resetAllData()" class="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-zinc-900 rounded border border-zinc-800 transition" title="Wipe Data partition">
-          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-        </button>
+    </div>
+
+    <!-- Lower Strip: Navigation & Session Indicators -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col md:flex-row items-center justify-between gap-3">
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 custom-scrollbar">
+        <a href="../index.html" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
+          <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i> Portal Home
+        </a>
+        <a href="./command-center.html" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
+          <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Command Center
+        </a>
+        <a href="./mock-analyzer.html" class="text-cyan-400 border-b border-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5 font-bold">
+          <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Mock Analyzer
+        </a>
+        <a href="https://sandeshbanala0811.github.io/jee-formula-vault/index.html" target="_blank" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
+          <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Formula Vault
+        </a>
+      </nav>
+
+      <!-- Dynamic Micro-Metrics -->
+      <div class="flex items-center gap-4 text-[10px] text-zinc-500 font-semibold uppercase tracking-wider shrink-0 w-full md:w-auto justify-end border-t border-zinc-900/50 md:border-none pt-2 md:pt-0">
+        <span class="flex items-center gap-1 bg-zinc-950 px-2 py-1 rounded border border-zinc-900">
+          Critical Backlogs: <span id="global-backlog-count" class="font-bold text-red-400">0</span>
+        </span>
       </div>
     </div>
   </header>
@@ -449,19 +469,20 @@
       ]
     };
 
-    // User State Management variables
-    let activeUser = localStorage.getItem('mpc_companion_user') || "";
+    // Shared Client Credentials (Aligned with mpc_v3 system)
+    let activeUser = localStorage.getItem('mpc_v3_user') || "";
     let loginMode = "local"; // "local" or "cloud"
     
-    // Cloud Credentials Cache
-    let cloudUrl = localStorage.getItem('mpc_companion_url') || "";
-    let cloudKey = localStorage.getItem('mpc_companion_key') || "";
+    // Cloud Credentials Cache (Aligned with mpc_v3 system)
+    let cloudUrl = localStorage.getItem('mpc_v3_url') || "";
+    let cloudKey = localStorage.getItem('mpc_v3_key') || "";
     
-    // Database SDK Client (Named uniquely to avoid overshadowing global window.supabase)
+    // Database SDK Client
     let supabaseClient = null;
 
     let mockTests = [];
     let checkpoints = [];
+    let logs = []; // Fetched study logs for multi-device revision verification
     let selectedDiff = "";
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -491,7 +512,6 @@
       });
     }
 
-    // Generate a single list checkbox row
     function createCheckboxItem(prefix, name) {
       const label = document.createElement('label');
       label.className = "flex items-center gap-1.5 px-1 py-0.5 hover:bg-zinc-900 rounded cursor-pointer select-none text-[9px] text-zinc-400";
@@ -524,7 +544,6 @@
         btnLocal.className = "flex-1 py-1.5 text-center text-[10px] font-bold rounded uppercase border border-zinc-800 bg-zinc-950/45 text-zinc-500 hover:border-zinc-700";
         cloudFields.classList.remove('hidden');
         
-        // Autocomplete if cached credentials exist
         document.getElementById('supabase-url').value = cloudUrl;
         document.getElementById('supabase-key').value = cloudKey;
       } else {
@@ -539,41 +558,37 @@
       const modal = document.getElementById('profile-modal');
       if (!activeUser) {
         modal.classList.remove('hidden');
-        // Default select previous setup state if cached
         if (cloudUrl && cloudKey) {
           toggleLoginMode('cloud');
         }
       } else {
         modal.classList.add('hidden');
         document.getElementById('active-user-display').innerText = activeUser.toUpperCase();
-        
-        // Initialize connections
         initDatabaseConnection();
       }
     }
 
     function initDatabaseConnection() {
-      cloudUrl = localStorage.getItem('mpc_companion_url') || "";
-      cloudKey = localStorage.getItem('mpc_companion_key') || "";
+      cloudUrl = localStorage.getItem('mpc_v3_url') || "";
+      cloudKey = localStorage.getItem('mpc_v3_key') || "";
       
       const modeBadge = document.getElementById('app-mode-badge');
 
       if (cloudUrl && cloudKey) {
         try {
-          // Initialize using global window.supabase object from CDN
           supabaseClient = supabase.createClient(cloudUrl, cloudKey);
           modeBadge.innerText = "CLOUD";
-          modeBadge.className = "text-emerald-400 text-xs";
+          modeBadge.className = "text-emerald-400 text-xs font-bold px-1 border border-emerald-500/20 bg-emerald-950/20 rounded";
         } catch (err) {
           console.error("Supabase config error:", err);
           supabaseClient = null;
           modeBadge.innerText = "OFFLINE";
-          modeBadge.className = "text-cyan-400 text-xs";
+          modeBadge.className = "text-cyan-400 text-xs font-bold px-1 border border-cyan-500/20 bg-cyan-950/20 rounded";
         }
       } else {
         supabaseClient = null;
         modeBadge.innerText = "OFFLINE";
-        modeBadge.className = "text-cyan-400 text-xs";
+        modeBadge.className = "text-cyan-400 text-xs font-bold px-1 border border-cyan-500/20 bg-cyan-950/20 rounded";
       }
       
       loadProfileDatabases();
@@ -597,22 +612,21 @@
           return;
         }
 
-        localStorage.setItem('mpc_companion_url', urlInput);
-        localStorage.setItem('mpc_companion_key', keyInput);
+        localStorage.setItem('mpc_v3_url', urlInput);
+        localStorage.setItem('mpc_v3_key', keyInput);
       } else {
-        // Clear cached credentials if logging in local-only
-        localStorage.removeItem('mpc_companion_url');
-        localStorage.removeItem('mpc_companion_key');
+        localStorage.removeItem('mpc_v3_url');
+        localStorage.removeItem('mpc_v3_key');
       }
 
       activeUser = userValue;
-      localStorage.setItem('mpc_companion_user', activeUser);
+      localStorage.setItem('mpc_v3_user', activeUser);
       verifyProfileSession();
     }
 
     function switchProfile() {
       activeUser = "";
-      localStorage.removeItem('mpc_companion_user');
+      localStorage.removeItem('mpc_v3_user');
       document.getElementById('profile-input').value = "";
       verifyProfileSession();
     }
@@ -632,6 +646,13 @@
             .from('mpc_checkpoints')
             .select('*')
             .eq('username', activeUser);
+
+          // Attempt to pull raw study logs for dynamic cross-validation of revisions
+          const { data: logData } = await supabaseClient
+            .from('mpc_study_logs')
+            .select('chapter, timestamp')
+            .eq('username', activeUser)
+            .order('created_at', { ascending: false });
 
           if (tErr || cErr) throw (tErr || cErr);
 
@@ -657,6 +678,11 @@
             date: c.date
           }));
 
+          logs = (logData || []).map(l => ({
+            chapter: l.chapter,
+            timestamp: l.timestamp
+          }));
+
           showToast("Cloud Sync Successful", "emerald");
         } catch (err) {
           console.warn("Cloud connection error. Loading local browser data:", err);
@@ -672,6 +698,7 @@
     function loadLocalBackup() {
       mockTests = JSON.parse(localStorage.getItem(`mpc_companion_tests_${activeUser}`)) || [];
       checkpoints = JSON.parse(localStorage.getItem(`mpc_companion_revisions_${activeUser}`)) || [];
+      logs = JSON.parse(localStorage.getItem(`mpc_v3_logs_${activeUser}`)) || []; // backup load
     }
 
     // Populate Dynamic Cascading Chapter Selector
@@ -754,10 +781,8 @@
 
       mockTests.unshift(mockEntry);
       
-      // Save local backup anyway for robustness
       localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
 
-      // Push to Supabase if available
       if (supabaseClient) {
         const { error } = await supabaseClient
           .from('mpc_mock_tests')
@@ -783,7 +808,6 @@
 
       refreshDashboard();
 
-      // Reset checkboxes & form
       document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => cb.checked = false);
       document.getElementById('mock-form').reset();
       const todayString = new Date().toISOString().split('T')[0];
@@ -812,14 +836,11 @@
         date
       };
 
-      // Filter local state duplicates
       checkpoints = checkpoints.filter(cp => cp.chapter !== chapter);
       checkpoints.unshift(checkpointEntry);
       localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
 
-      // Push to Cloud
       if (supabaseClient) {
-        // Delete older database chapter entries to keep strictly latest record
         await supabaseClient
           .from('mpc_checkpoints')
           .delete()
@@ -845,7 +866,6 @@
 
       refreshDashboard();
 
-      // Reset fields
       document.getElementById('checkpoint-form').reset();
       document.getElementById('chapter-select').disabled = true;
       document.getElementById('chapter-select').innerHTML = '<option value="" disabled selected>Select Subject first</option>';
@@ -889,6 +909,31 @@
 
       refreshDashboard();
       showToast("Checkpoint record cleared.", "rose");
+    }
+
+    function saveState() {
+      if (!activeUser) return;
+      localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
+      localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
+    }
+
+    async function resetAllData() {
+      if (!activeUser) return;
+      if (confirm(`Wipe mock scores and revision benchmarks under "${activeUser}"?`)) {
+        localStorage.removeItem(`mpc_companion_tests_${activeUser}`);
+        localStorage.removeItem(`mpc_companion_revisions_${activeUser}`);
+        
+        if (supabaseClient) {
+          const { error: tErr } = await supabaseClient.from('mpc_mock_tests').delete().eq('username', activeUser);
+          const { error: cErr } = await supabaseClient.from('mpc_checkpoints').delete().eq('username', activeUser);
+          if (tErr || cErr) console.error("Cloud reset issues:", tErr || cErr);
+        }
+
+        mockTests = [];
+        checkpoints = [];
+        refreshDashboard();
+        showToast("Database reset.", "rose");
+      }
     }
 
     /* Calculations & Board Sync */
@@ -967,10 +1012,19 @@
       let urgentCount = 0;
       let decayWarningsList = [];
 
+      // Create mapping of the latest checkpoint dates for resolution validation
       const latestCheckpointDate = {};
       checkpoints.forEach(cp => {
         if (!latestCheckpointDate[cp.chapter]) {
           latestCheckpointDate[cp.chapter] = new Date(cp.date);
+        }
+      });
+
+      // CONNECTION FEATURE: Integrate daily study logs as virtual revision checkpoints
+      logs.forEach(log => {
+        const logDate = new Date(log.timestamp);
+        if (!latestCheckpointDate[log.chapter] || logDate > latestCheckpointDate[log.chapter]) {
+          latestCheckpointDate[log.chapter] = logDate;
         }
       });
 
@@ -1130,16 +1184,6 @@
       }
 
       lucide.createIcons();
-    }
-
-    // Handle shift difficulty button actions in column lists
-    function shiftDifficultyLevel(chapter, currentLevel) {
-      const nextMap = { 'Easy': 'Medium', 'Medium': 'Hard', 'Hard': 'Easy' };
-      const nextLevel = nextMap[currentLevel];
-      chapterDifficulty[chapter] = nextLevel;
-      saveState();
-      refreshDashboard();
-      showToast(`Moved "${chapter}" difficulty index to ${nextLevel}.`, "cyan");
     }
 
     /* Notification Alerts */
