@@ -417,44 +417,109 @@
     const SYLLABUS_DATA = {
       "Mathematics": [
         "Sets, Relations & Functions",
-        "Trigonometric Functions",
-        "Matrices & Determinants",
-        "Quadratic Equations",
+        "Trigonometric Ratios & Transformations",
+        "Trigonometric Equations",
+        "Inverse Trigonometric Functions",
+        "Hyperbolic Functions",
+        "Properties of Triangles & Heights & Distances",
+        "Complex Numbers & De Moivre’s Theorem",
+        "Quadratic Equations & Expressions",
+        "Theory of Equations",
+        "Linear Inequalities",
         "Permutations & Combinations",
-        "Sequences & Series",
+        "Mathematical Induction",
+        "Binomial Theorem",
+        "Sequences and Series (AP, GP, HP)",
+        "Partial Fractions",
+        "Matrices & Determinants",
+        "Addition of Vectors",
+        "Product of Vectors",
+        "Locus & Transformation of Axes",
+        "The Straight Line",
+        "Pair of Straight Lines",
+        "Circle & System of Circles",
+        "Parabola",
+        "Ellipse",
+        "Hyperbola",
+        "Three-Dimensional Geometry (Coordinates, Lines & Planes)",
+        "Direction Cosines & Direction Ratios",
+        "The Plane",
         "Limits, Continuity & Differentiability",
-        "Integral Calculus",
+        "Differentiation (Methods of Differentiation)",
+        "Applications of Derivatives (Tangents, Monotonicity, Maxima-Minima)",
+        "Indefinite Integration",
+        "Definite Integrals & Area Under Curves",
         "Differential Equations",
-        "Vector Algebra & 3D Geometry",
-        "Probability"
+        "Measures of Dispersion & Statistics",
+        "Probability & Random Variables",
+        "Mathematical Reasoning"
       ],
       "Physics": [
-        "Units, Measurements & Kinematics",
-        "Laws of Motion",
-        "Work, Energy & Power",
-        "Rotational Motion",
+        "Physical World & Units and Measurements",
+        "Motion in a Straight Line (Kinematics 1D)",
+        "Motion in a Plane (Vectors, Projectile & Circular)",
+        "Laws of Motion & Friction",
+        "Work, Energy and Power",
+        "System of Particles and Centre of Mass",
+        "Rotational Motion & Rigid Body Dynamics",
         "Gravitation",
-        "Thermodynamics & Kinetic Theory",
-        "Electrostatics",
+        "Mechanical Properties of Solids (Elasticity)",
+        "Mechanical Properties of Fluids (Hydrostatics, Viscosity & Surface Tension)",
+        "Thermal Properties of Matter & Calorimetry",
+        "Thermodynamics",
+        "Kinetic Theory of Gases",
+        "Oscillations (Simple Harmonic Motion)",
+        "Waves & Sound Waves",
+        "Electric Charges and Fields (Electrostatics I)",
+        "Electrostatic Potential and Capacitance (Electrostatics II)",
         "Current Electricity",
-        "Magnetic Effects of Current",
-        "Electromagnetic Induction & AC",
-        "Optics (Ray & Wave)",
-        "Modern Physics"
+        "Moving Charges and Magnetism (Magnetic Effects of Current)",
+        "Magnetism and Matter",
+        "Electromagnetic Induction (EMI)",
+        "Alternating Current (AC)",
+        "Electromagnetic Waves",
+        "Ray Optics and Optical Instruments",
+        "Wave Optics (Interference, Diffraction & Polarization)",
+        "Dual Nature of Radiation and Matter",
+        "Atoms & Atomic Structure",
+        "Nuclei & Nuclear Physics",
+        "Semiconductor Electronics & Logic Gates",
+        "Communication Systems",
+        "Experimental Physics & Error Analysis"
       ],
       "Chemistry": [
-        "Some Basic Concepts of Chemistry",
+        "Some Basic Concepts of Chemistry (Mole Concept & Stoichiometry)",
         "Structure of Atom",
-        "Classification of Elements & Periodicity",
-        "Chemical Bonding",
-        "Chemical Thermodynamics",
-        "Equilibrium",
-        "Solutions",
-        "Electrochemistry & Kinetics",
-        "Coordination Compounds",
-        "Hydrocarbons",
-        "Halogen, Oxygen & Nitrogen Derivatives",
-        "Biomolecules"
+        "Classification of Elements and Periodicity",
+        "Chemical Bonding and Molecular Structure",
+        "States of Matter: Gases and Liquids",
+        "Chemical Thermodynamics & Energetics",
+        "Chemical Equilibrium",
+        "Ionic Equilibrium & Acid-Bases",
+        "Redox Reactions & Oxidation Numbers",
+        "Hydrogen and its Compounds",
+        "s-Block Elements (Alkali & Alkaline Earth Metals)",
+        "p-Block Elements: Group 13 & 14 (Boron & Carbon Families)",
+        "Environmental Chemistry",
+        "General Organic Chemistry (GOC & Isomerism)",
+        "Hydrocarbons (Alkanes, Alkenes, Alkynes & Arenes)",
+        "Solid State",
+        "Solutions & Colligative Properties",
+        "Electrochemistry",
+        "Chemical Kinetics",
+        "Surface Chemistry",
+        "General Principles and Processes of Isolation of Elements (Metallurgy)",
+        "p-Block Elements: Group 15, 16, 17 & 18",
+        "d and f Block Elements",
+        "Coordination Compounds & Organometallics",
+        "Haloalkanes and Haloarenes",
+        "Alcohols, Phenols and Ethers",
+        "Aldehydes, Ketones and Carboxylic Acids",
+        "Organic Compounds Containing Nitrogen (Amines & Diazonium Salts)",
+        "Biomolecules",
+        "Polymers",
+        "Chemistry in Everyday Life",
+        "Practical & Analytical Chemistry (Salt Analysis)"
       ]
     };
 
@@ -466,8 +531,8 @@
     let cloudUrl = localStorage.getItem('mpc_v3_url') || "";
     let cloudKey = localStorage.getItem('mpc_v3_key') || "";
     
-    // Database SDK Client
-    let supabaseClient = null; // Renamed to avoid global namespace collision
+    // Database SDK Client (Named uniquely to avoid overshadowing global window.supabase)
+    let supabaseClient = null;
 
     // Local profile variables
     let logs = [];
@@ -627,7 +692,7 @@
 
           showToast("Cloud Sync Successful", "emerald");
         } catch (err) {
-          console.warn("Cloud connection error. Loading local browser data:", err);
+          console.warn("Cloud connection error. Loading local data:", err);
           showToast("Cloud Sync Error. Falling back locally.", "rose");
           loadLocalBackup();
         }
