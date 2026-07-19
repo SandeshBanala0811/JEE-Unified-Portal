@@ -32,7 +32,7 @@
 
   <!-- PROFILE GATEWAY OVERLAY -->
   <div id="profile-modal" class="fixed inset-0 bg-zinc-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-    <div class="border border-zinc-800 bg-zinc-900 max-w-md w-full p-6 rounded shadow-2xl relative">
+    <div class="border border-zinc-800 bg-zinc-900 max-w-md w-full p-6 rounded shadow-2xl">
       <div class="flex items-center gap-2 mb-4 border-b border-zinc-800 pb-3">
         <div class="p-1.5 bg-cyan-500/10 border border-cyan-500/30 rounded text-cyan-400">
           <i data-lucide="user-check" class="w-5 h-5"></i>
@@ -45,10 +45,10 @@
       
       <!-- Database Mode Selector -->
       <div class="grid grid-cols-2 gap-2 mb-4">
-        <button type="button" onclick="toggleLoginMode('local')" id="btn-mode-local" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
+        <button onclick="toggleLoginMode('local')" id="btn-mode-local" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
           Browser Storage
         </button>
-        <button type="button" onclick="toggleLoginMode('cloud')" id="btn-mode-cloud" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-zinc-800 bg-zinc-950/45 text-zinc-500 hover:border-zinc-700">
+        <button onclick="toggleLoginMode('cloud')" id="btn-mode-cloud" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-zinc-800 bg-zinc-950/45 text-zinc-500 hover:border-zinc-700">
           Supabase Cloud
         </button>
       </div>
@@ -81,7 +81,7 @@
 
   <!-- Header -->
   <header class="border-b border-zinc-800 bg-zinc-900/80 sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-4">
+    <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
       
       <!-- Brand -->
       <div class="flex items-center gap-2.5">
@@ -95,25 +95,9 @@
           <p class="text-[10px] text-zinc-500">JEE Revision Decay & Analytics Suite</p>
         </div>
       </div>
-
-      <!-- Center: Navigation -->
-      <nav class="flex items-center gap-6 border-y border-zinc-800 lg:border-none py-2 lg:py-0 w-full lg:w-auto justify-center">
-        <a href="../index.html" class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5">
-          <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i> Portal Home
-        </a>
-        <a href="./command-center.html" class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5">
-          <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Command Center
-        </a>
-        <a href="./mock-analyzer.html" class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 border-b-2 border-cyan-400 pb-0.5 transition flex items-center gap-1.5">
-          <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Mock Analyzer
-        </a>
-        <a href="https://sandeshbanala0811.github.io/jee-formula-vault/index.html" target="_blank" class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5">
-          <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Formula Vault
-        </a>
-      </nav>
       
       <!-- Profile & Global Stats -->
-      <div class="flex flex-wrap items-center justify-center lg:justify-end gap-3">
+      <div class="flex flex-wrap items-center gap-3">
         <div class="border border-cyan-500/20 bg-cyan-950/20 px-3 py-1.5 rounded flex items-center gap-2">
           <i data-lucide="user" class="w-3.5 h-3.5 text-cyan-400"></i>
           <span id="active-user-display" class="text-xs font-bold text-cyan-400">GUEST</span>
@@ -125,7 +109,7 @@
           <span class="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Backlogs</span>
           <span id="global-backlog-count" class="text-xs font-bold text-red-400">0</span>
         </div>
-        <button onclick="resetAllData()" class="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-zinc-900 rounded border border-zinc-800 transition" title="Wipe Current Profile Data">
+        <button onclick="resetAllData()" class="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-zinc-900 rounded border border-zinc-800 transition" title="Wipe Data partition">
           <i data-lucide="refresh-cw" class="w-4 h-4"></i>
         </button>
       </div>
@@ -139,7 +123,7 @@
   <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
-      <!-- LEFT MODULE: Mock Test Analytics Platform (Spans 6 Cols) -->
+      <!-- LEFT MODULE: Mock Test Analytics Platform -->
       <div class="lg:col-span-6 space-y-6">
         
         <!-- Log Mock Exam Card -->
@@ -184,21 +168,21 @@
                 <!-- Maths chapters multi-checkbox container -->
                 <div>
                   <label class="block text-[9px] font-bold text-zinc-500 mb-1">Mathematics</label>
-                  <div id="mock-math-chaps" class="bg-zinc-950 border border-zinc-800 rounded p-1.5 h-32 overflow-y-auto custom-scrollbar space-y-1">
+                  <div id="mock-math-chaps" class="bg-zinc-950 border border-zinc-800 rounded p-1.5 h-28 overflow-y-auto custom-scrollbar space-y-1">
                     <!-- Dynamic -->
                   </div>
                 </div>
                 <!-- Physics chapters multi-checkbox container -->
                 <div>
                   <label class="block text-[9px] font-bold text-zinc-500 mb-1">Physics</label>
-                  <div id="mock-phys-chaps" class="bg-zinc-950 border border-zinc-800 rounded p-1.5 h-32 overflow-y-auto custom-scrollbar space-y-1">
+                  <div id="mock-phys-chaps" class="bg-zinc-950 border border-zinc-800 rounded p-1.5 h-28 overflow-y-auto custom-scrollbar space-y-1">
                     <!-- Dynamic -->
                   </div>
                 </div>
                 <!-- Chemistry chapters multi-checkbox container -->
                 <div>
                   <label class="block text-[9px] font-bold text-zinc-500 mb-1">Chemistry</label>
-                  <div id="mock-chem-chaps" class="bg-zinc-950 border border-zinc-800 rounded p-1.5 h-32 overflow-y-auto custom-scrollbar space-y-1">
+                  <div id="mock-chem-chaps" class="bg-zinc-950 border border-zinc-800 rounded p-1.5 h-28 overflow-y-auto custom-scrollbar space-y-1">
                     <!-- Dynamic -->
                   </div>
                 </div>
@@ -266,13 +250,13 @@
         <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded">
           <p class="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-1.5 mb-3">Mock Exam History Ledger</p>
           <div id="mock-test-ledger" class="space-y-2 max-h-[180px] overflow-y-auto custom-scrollbar">
-            <!-- Generated programmatically -->
+            <!-- Dynamic -->
           </div>
         </div>
 
       </div>
 
-      <!-- RIGHT MODULE: Revision Guardian & Backlog Monitor (Spans 6 Cols) -->
+      <!-- RIGHT MODULE: Revision Guardian & Backlog Monitor -->
       <div class="lg:col-span-6 space-y-6">
         
         <!-- Log Revision Checkpoint Form -->
@@ -285,8 +269,8 @@
             <div class="grid grid-cols-2 gap-3">
               <!-- Cascading Subject -->
               <div>
-                <label for="subject-select-cp" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Subject</label>
-                <select id="subject-select-cp" onchange="populateChaptersCP()" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
+                <label for="subject-select" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Subject</label>
+                <select id="subject-select" onchange="populateChapters()" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
                   <option value="" disabled selected>Select Subject</option>
                   <option value="Mathematics">Mathematics</option>
                   <option value="Physics">Physics</option>
@@ -296,8 +280,8 @@
 
               <!-- Cascading Chapter -->
               <div>
-                <label for="chapter-select-cp" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Chapter</label>
-                <select id="chapter-select-cp" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 disabled:opacity-40 transition" disabled>
+                <label for="chapter-select" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Chapter</label>
+                <select id="chapter-select" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 disabled:opacity-40 transition" disabled>
                   <option value="" disabled selected>Select Subject first</option>
                 </select>
               </div>
@@ -355,7 +339,7 @@
 
   <!-- Interactive Logic -->
   <script>
-    // Master Verified JEE Complete Syllabus
+    // Master Verified Complete Syllabus
     const SYLLABUS_DATA = {
       "Mathematics": [
         "Sets, Relations & Functions",
@@ -385,7 +369,8 @@
         "Hyperbola",
         "Three-Dimensional Geometry (Coordinates, Lines & Planes)",
         "Direction Cosines & Direction Ratios",
-        "Limits, Continuity & Differentiability",
+        "The Plane",
+        "Limits and Continuity",
         "Differentiation (Methods of Differentiation)",
         "Applications of Derivatives (Tangents, Monotonicity, Maxima-Minima)",
         "Indefinite Integration",
@@ -455,7 +440,7 @@
         "Coordination Compounds & Organometallics",
         "Haloalkanes and Haloarenes",
         "Alcohols, Phenols and Ethers",
-        "Aldehydes, Kidneys and Carboxylic Acids",
+        "Aldehydes, Ketones and Carboxylic Acids",
         "Organic Compounds Containing Nitrogen (Amines & Diazonium Salts)",
         "Biomolecules",
         "Polymers",
@@ -464,7 +449,7 @@
       ]
     };
 
-    // Client State 
+    // User State Management variables
     let activeUser = localStorage.getItem('mpc_companion_user') || "";
     let loginMode = "local"; // "local" or "cloud"
     
@@ -472,22 +457,19 @@
     let cloudUrl = localStorage.getItem('mpc_companion_url') || "";
     let cloudKey = localStorage.getItem('mpc_companion_key') || "";
     
-    // Database SDK Client
-    let supabaseClient = null; // Renamed to avoid global namespace collision
+    // Database SDK Client (Named uniquely to avoid overshadowing global window.supabase)
+    let supabaseClient = null;
 
     let mockTests = [];
     let checkpoints = [];
     let selectedDiff = "";
 
     window.addEventListener('DOMContentLoaded', () => {
-      // Setup default dates
       const todayString = new Date().toISOString().split('T')[0];
       document.getElementById('mock-date').value = todayString;
       document.getElementById('checkpoint-date').value = todayString;
 
-      // Populate Mock Tested Chapters Scrollboxes
       populateMockLists();
-
       lucide.createIcons();
       verifyProfileSession();
     });
@@ -557,7 +539,7 @@
       const modal = document.getElementById('profile-modal');
       if (!activeUser) {
         modal.classList.remove('hidden');
-        // Default select previous setup state
+        // Default select previous setup state if cached
         if (cloudUrl && cloudKey) {
           toggleLoginMode('cloud');
         }
@@ -565,7 +547,7 @@
         modal.classList.add('hidden');
         document.getElementById('active-user-display').innerText = activeUser.toUpperCase();
         
-        // Attempt cloud connection if parameters are available
+        // Initialize connections
         initDatabaseConnection();
       }
     }
@@ -578,6 +560,7 @@
 
       if (cloudUrl && cloudKey) {
         try {
+          // Initialize using global window.supabase object from CDN
           supabaseClient = supabase.createClient(cloudUrl, cloudKey);
           modeBadge.innerText = "CLOUD";
           modeBadge.className = "text-emerald-400 text-xs";
@@ -692,9 +675,9 @@
     }
 
     // Populate Dynamic Cascading Chapter Selector
-    function populateChaptersCP() {
-      const subject = document.getElementById('subject-select-cp').value;
-      const chapterSelect = document.getElementById('chapter-select-cp');
+    function populateChapters() {
+      const subject = document.getElementById('subject-select').value;
+      const chapterSelect = document.getElementById('chapter-select');
 
       chapterSelect.innerHTML = '<option value="" disabled selected>Select Chapter</option>';
       
@@ -727,6 +710,10 @@
             (lvl === 'Easy' ? 'emerald' : lvl === 'Medium' ? 'amber' : 'red') + "-500/40 rounded transition";
         }
       });
+    }
+
+    function updateFocusRatingDisplay(val) {
+      document.getElementById('focus-rating-display').innerText = ratingDescriptions[val] || `${val} // Rated`;
     }
 
     /* Operations Writers */
@@ -807,8 +794,8 @@
     async function handleCheckpointSubmit(e) {
       e.preventDefault();
 
-      const subject = document.getElementById('subject-select-cp').value;
-      const chapter = document.getElementById('chapter-select-cp').value;
+      const subject = document.getElementById('subject-select').value;
+      const chapter = document.getElementById('chapter-select').value;
       const confidence = document.getElementById('selected-diff').value;
       const date = document.getElementById('checkpoint-date').value;
 
@@ -860,8 +847,8 @@
 
       // Reset fields
       document.getElementById('checkpoint-form').reset();
-      document.getElementById('chapter-select-cp').disabled = true;
-      document.getElementById('chapter-select-cp').innerHTML = '<option value="" disabled selected>Select Subject first</option>';
+      document.getElementById('chapter-select').disabled = true;
+      document.getElementById('chapter-select').innerHTML = '<option value="" disabled selected>Select Subject first</option>';
       
       selectedDiff = "";
       document.getElementById('selected-diff').value = "";
@@ -1143,6 +1130,16 @@
       }
 
       lucide.createIcons();
+    }
+
+    // Handle shift difficulty button actions in column lists
+    function shiftDifficultyLevel(chapter, currentLevel) {
+      const nextMap = { 'Easy': 'Medium', 'Medium': 'Hard', 'Hard': 'Easy' };
+      const nextLevel = nextMap[currentLevel];
+      chapterDifficulty[chapter] = nextLevel;
+      saveState();
+      refreshDashboard();
+      showToast(`Moved "${chapter}" difficulty index to ${nextLevel}.`, "cyan");
     }
 
     /* Notification Alerts */
