@@ -133,6 +133,7 @@
           </h2>
 
           <form id="mock-form" onsubmit="handleMockSubmit(event)" class="space-y-4 text-xs">
+            <!-- Test Meta Row -->
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label for="mock-name" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Exam Reference Name</label>
@@ -144,6 +145,7 @@
               </div>
             </div>
 
+            <!-- Scores Row -->
             <div class="grid grid-cols-3 gap-3">
               <div>
                 <label for="mock-math" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Maths Score</label>
@@ -163,18 +165,21 @@
             <div class="border-t border-zinc-800/80 pt-3 space-y-2">
               <span class="block text-[9px] uppercase font-bold tracking-wider text-cyan-400">Tested Chapters (Select all that apply)</span>
               <div class="grid grid-cols-3 gap-3">
+                <!-- Maths chapters multi-checkbox container -->
                 <div>
                   <label class="block text-[9px] font-bold text-zinc-500 mb-1">Mathematics</label>
                   <div id="mock-math-chaps" class="bg-zinc-950 border border-zinc-800 rounded p-1.5 h-28 overflow-y-auto custom-scrollbar space-y-1">
                     <!-- Dynamic -->
                   </div>
                 </div>
+                <!-- Physics chapters multi-checkbox container -->
                 <div>
                   <label class="block text-[9px] font-bold text-zinc-500 mb-1">Physics</label>
                   <div id="mock-phys-chaps" class="bg-zinc-950 border border-zinc-800 rounded p-1.5 h-28 overflow-y-auto custom-scrollbar space-y-1">
                     <!-- Dynamic -->
                   </div>
                 </div>
+                <!-- Chemistry chapters multi-checkbox container -->
                 <div>
                   <label class="block text-[9px] font-bold text-zinc-500 mb-1">Chemistry</label>
                   <div id="mock-chem-chaps" class="bg-zinc-950 border border-zinc-800 rounded p-1.5 h-28 overflow-y-auto custom-scrollbar space-y-1">
@@ -262,6 +267,7 @@
 
           <form id="checkpoint-form" onsubmit="handleCheckpointSubmit(event)" class="space-y-4 text-xs">
             <div class="grid grid-cols-2 gap-3">
+              <!-- Cascading Subject -->
               <div>
                 <label for="subject-select" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Subject</label>
                 <select id="subject-select" onchange="populateChapters()" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
@@ -272,6 +278,7 @@
                 </select>
               </div>
 
+              <!-- Cascading Chapter -->
               <div>
                 <label for="chapter-select" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Chapter</label>
                 <select id="chapter-select" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 disabled:opacity-40 transition" disabled>
@@ -281,6 +288,7 @@
             </div>
 
             <div class="grid grid-cols-2 gap-3">
+              <!-- Checkpoint Difficulty -->
               <div>
                 <label class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Retention Confidence</label>
                 <div class="grid grid-cols-3 gap-1">
@@ -291,6 +299,7 @@
                 <input type="hidden" id="selected-diff" value="" required>
               </div>
 
+              <!-- Checkpoint Date -->
               <div>
                 <label for="checkpoint-date" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Revision Date</label>
                 <input type="date" id="checkpoint-date" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
@@ -304,14 +313,14 @@
           </form>
         </div>
 
-        <!-- Revision Decay & Backlog Alerts -->
+        <!-- Revision Decay & Backlog Alerts (Dynamic Watchdog) -->
         <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded">
           <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mb-4 border-b border-zinc-800 pb-2">
             <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> 04 // Revision Decay & Backlogs
           </h2>
           
           <div id="backlog-alerts-feed" class="space-y-2 max-h-[350px] overflow-y-auto custom-scrollbar">
-            <!-- Dynamic -->
+            <!-- Dynamically calculated backlogs will list here -->
           </div>
         </div>
 
@@ -319,7 +328,7 @@
         <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded">
           <p class="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-1.5 mb-3">Revision Checkpoint Ledger</p>
           <div id="checkpoint-ledger" class="space-y-2 max-h-[180px] overflow-y-auto custom-scrollbar">
-            <!-- Dynamic -->
+            <!-- Generated programmatically -->
           </div>
         </div>
 
@@ -328,8 +337,9 @@
     </div>
   </main>
 
+  <!-- Interactive Logic -->
   <script>
-    // Master Syllabus Database
+    // Master Verified Complete Syllabus
     const SYLLABUS_DATA = {
       "Mathematics": [
         "Sets, Relations & Functions",
@@ -359,7 +369,8 @@
         "Hyperbola",
         "Three-Dimensional Geometry (Coordinates, Lines & Planes)",
         "Direction Cosines & Direction Ratios",
-        "Limits, Continuity & Differentiability",
+        "The Plane",
+        "Limits and Continuity",
         "Differentiation (Methods of Differentiation)",
         "Applications of Derivatives (Tangents, Monotonicity, Maxima-Minima)",
         "Indefinite Integration",
@@ -438,7 +449,7 @@
       ]
     };
 
-    // Client State 
+    // User State Management variables
     let activeUser = localStorage.getItem('mpc_companion_user') || "";
     let loginMode = "local"; // "local" or "cloud"
     
@@ -446,8 +457,8 @@
     let cloudUrl = localStorage.getItem('mpc_companion_url') || "";
     let cloudKey = localStorage.getItem('mpc_companion_key') || "";
     
-    // Database SDK Client
-    let supabase = null;
+    // Database SDK Client (Named uniquely to avoid overshadowing global window.supabase)
+    let supabaseClient = null;
 
     let mockTests = [];
     let checkpoints = [];
@@ -463,17 +474,24 @@
       verifyProfileSession();
     });
 
-    // Populate dynamic scrollboxes
+    // Populate scroll boxes with multi-select checkboxes
     function populateMockLists() {
       const mathBox = document.getElementById('mock-math-chaps');
       const physBox = document.getElementById('mock-phys-chaps');
       const chemBox = document.getElementById('mock-chem-chaps');
 
-      SYLLABUS_DATA["Mathematics"].forEach(ch => mathBox.appendChild(createCheckboxItem("math-ch", ch)));
-      SYLLABUS_DATA["Physics"].forEach(ch => physBox.appendChild(createCheckboxItem("phys-ch", ch)));
-      SYLLABUS_DATA["Chemistry"].forEach(ch => chemBox.appendChild(createCheckboxItem("chem-ch", ch)));
+      SYLLABUS_DATA["Mathematics"].forEach(ch => {
+        mathBox.appendChild(createCheckboxItem("math-ch", ch));
+      });
+      SYLLABUS_DATA["Physics"].forEach(ch => {
+        physBox.appendChild(createCheckboxItem("phys-ch", ch));
+      });
+      SYLLABUS_DATA["Chemistry"].forEach(ch => {
+        chemBox.appendChild(createCheckboxItem("chem-ch", ch));
+      });
     }
 
+    // Generate a single list checkbox row
     function createCheckboxItem(prefix, name) {
       const label = document.createElement('label');
       label.className = "flex items-center gap-1.5 px-1 py-0.5 hover:bg-zinc-900 rounded cursor-pointer select-none text-[9px] text-zinc-400";
@@ -516,11 +534,12 @@
       }
     }
 
+    // Profile Modal authentication verification
     function verifyProfileSession() {
       const modal = document.getElementById('profile-modal');
       if (!activeUser) {
         modal.classList.remove('hidden');
-        // Default select previous setup state
+        // Default select previous setup state if cached
         if (cloudUrl && cloudKey) {
           toggleLoginMode('cloud');
         }
@@ -528,7 +547,7 @@
         modal.classList.add('hidden');
         document.getElementById('active-user-display').innerText = activeUser.toUpperCase();
         
-        // Attempt cloud connection if parameters are available
+        // Initialize connections
         initDatabaseConnection();
       }
     }
@@ -541,17 +560,18 @@
 
       if (cloudUrl && cloudKey) {
         try {
-          supabase = supabaseJS.createClient(cloudUrl, cloudKey);
+          // Initialize using global window.supabase object from CDN
+          supabaseClient = supabase.createClient(cloudUrl, cloudKey);
           modeBadge.innerText = "CLOUD";
           modeBadge.className = "text-emerald-400 text-xs";
         } catch (err) {
           console.error("Supabase config error:", err);
-          supabase = null;
+          supabaseClient = null;
           modeBadge.innerText = "OFFLINE";
           modeBadge.className = "text-cyan-400 text-xs";
         }
       } else {
-        supabase = null;
+        supabaseClient = null;
         modeBadge.innerText = "OFFLINE";
         modeBadge.className = "text-cyan-400 text-xs";
       }
@@ -599,16 +619,16 @@
 
     // Dynamic Loader: Cloud or Fallback Local Partition
     async function loadProfileDatabases() {
-      if (supabase) {
+      if (supabaseClient) {
         showToast("Synchronizing with Cloud DB...", "cyan");
         try {
-          const { data: testData, error: tErr } = await supabase
+          const { data: testData, error: tErr } = await supabaseClient
             .from('mpc_mock_tests')
             .select('*')
             .eq('username', activeUser)
             .order('created_at', { ascending: false });
 
-          const { data: cpData, error: cErr } = await supabase
+          const { data: cpData, error: cErr } = await supabaseClient
             .from('mpc_checkpoints')
             .select('*')
             .eq('username', activeUser);
@@ -738,8 +758,8 @@
       localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
 
       // Push to Supabase if available
-      if (supabase) {
-        const { error } = await supabase
+      if (supabaseClient) {
+        const { error } = await supabaseClient
           .from('mpc_mock_tests')
           .insert({
             id: mockEntry.id,
@@ -798,15 +818,15 @@
       localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
 
       // Push to Cloud
-      if (supabase) {
+      if (supabaseClient) {
         // Delete older database chapter entries to keep strictly latest record
-        await supabase
+        await supabaseClient
           .from('mpc_checkpoints')
           .delete()
           .eq('username', activeUser)
           .eq('chapter', chapter);
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
           .from('mpc_checkpoints')
           .insert({
             id: checkpointEntry.id,
@@ -845,8 +865,8 @@
       mockTests = mockTests.filter(t => t.id !== id);
       localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
 
-      if (supabase) {
-        const { error } = await supabase.from('mpc_mock_tests').delete().eq('id', id);
+      if (supabaseClient) {
+        const { error } = await supabaseClient.from('mpc_mock_tests').delete().eq('id', id);
         if (error) console.error("Cloud deletion issues:", error);
       }
 
@@ -859,8 +879,8 @@
       checkpoints = checkpoints.filter(c => c.id !== id);
       localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
 
-      if (supabase && target) {
-        const { error } = await supabase
+      if (supabaseClient && target) {
+        const { error } = await supabaseClient
           .from('mpc_checkpoints')
           .delete()
           .eq('id', id);
@@ -1110,6 +1130,16 @@
       }
 
       lucide.createIcons();
+    }
+
+    // Handle shift difficulty button actions in column lists
+    function shiftDifficultyLevel(chapter, currentLevel) {
+      const nextMap = { 'Easy': 'Medium', 'Medium': 'Hard', 'Hard': 'Easy' };
+      const nextLevel = nextMap[currentLevel];
+      chapterDifficulty[chapter] = nextLevel;
+      saveState();
+      refreshDashboard();
+      showToast(`Moved "${chapter}" difficulty index to ${nextLevel}.`, "cyan");
     }
 
     /* Notification Alerts */
