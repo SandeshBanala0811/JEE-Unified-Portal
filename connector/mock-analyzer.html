@@ -45,10 +45,10 @@
       
       <!-- Database Mode Selector -->
       <div class="grid grid-cols-2 gap-2 mb-4">
-        <button onclick="toggleLoginMode('local')" id="btn-mode-local" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
+        <button type="button" onclick="toggleLoginMode('local')" id="btn-mode-local" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
           Browser Storage
         </button>
-        <button onclick="toggleLoginMode('cloud')" id="btn-mode-cloud" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-zinc-800 bg-zinc-950/45 text-zinc-500 hover:border-zinc-700">
+        <button type="button" onclick="toggleLoginMode('cloud')" id="btn-mode-cloud" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-zinc-800 bg-zinc-950/45 text-zinc-500 hover:border-zinc-700">
           Supabase Cloud
         </button>
       </div>
@@ -473,7 +473,7 @@
     let cloudKey = localStorage.getItem('mpc_companion_key') || "";
     
     // Database SDK Client
-    let supabase = null;
+    let supabaseClient = null; // Renamed to avoid global namespace collision
 
     let mockTests = [];
     let checkpoints = [];
@@ -578,17 +578,17 @@
 
       if (cloudUrl && cloudKey) {
         try {
-          supabase = supabaseJS.createClient(cloudUrl, cloudKey);
+          supabaseClient = supabase.createClient(cloudUrl, cloudKey);
           modeBadge.innerText = "CLOUD";
           modeBadge.className = "text-emerald-400 text-xs";
         } catch (err) {
           console.error("Supabase config error:", err);
-          supabase = null;
+          supabaseClient = null;
           modeBadge.innerText = "OFFLINE";
           modeBadge.className = "text-cyan-400 text-xs";
         }
       } else {
-        supabase = null;
+        supabaseClient = null;
         modeBadge.innerText = "OFFLINE";
         modeBadge.className = "text-cyan-400 text-xs";
       }
@@ -636,16 +636,16 @@
 
     // Dynamic Loader: Cloud or Fallback Local Partition
     async function loadProfileDatabases() {
-      if (supabase) {
+      if (supabaseClient) {
         showToast("Synchronizing with Cloud DB...", "cyan");
         try {
-          const { data: testData, error: tErr } = await supabase
+          const { data: testData, error: tErr } = await supabaseClient
             .from('mpc_mock_tests')
             .select('*')
             .eq('username', activeUser)
             .order('created_at', { ascending: false });
 
-          const { data: cpData, error: cErr } = await supabase
+          const { data: cpData, error: cErr } = await supabaseClient
             .from('mpc_checkpoints')
             .select('*')
             .eq('username', activeUser);
@@ -771,8 +771,8 @@
       localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
 
       // Push to Supabase if available
-      if (supabase) {
-        const { error } = await supabase
+      if (supabaseClient) {
+        const { error } = await supabaseClient
           .from('mpc_mock_tests')
           .insert({
             id: mockEntry.id,
@@ -831,15 +831,15 @@
       localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
 
       // Push to Cloud
-      if (supabase) {
+      if (supabaseClient) {
         // Delete older database chapter entries to keep strictly latest record
-        await supabase
+        await supabaseClient
           .from('mpc_checkpoints')
           .delete()
           .eq('username', activeUser)
           .eq('chapter', chapter);
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
           .from('mpc_checkpoints')
           .insert({
             id: checkpointEntry.id,
@@ -878,8 +878,8 @@
       mockTests = mockTests.filter(t => t.id !== id);
       localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
 
-      if (supabase) {
-        const { error } = await supabase.from('mpc_mock_tests').delete().eq('id', id);
+      if (supabaseClient) {
+        const { error } = await supabaseClient.from('mpc_mock_tests').delete().eq('id', id);
         if (error) console.error("Cloud deletion issues:", error);
       }
 
@@ -892,8 +892,8 @@
       checkpoints = checkpoints.filter(c => c.id !== id);
       localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
 
-      if (supabase && target) {
-        const { error } = await supabase
+      if (supabaseClient && target) {
+        const { error } = await supabaseClient
           .from('mpc_checkpoints')
           .delete()
           .eq('id', id);
