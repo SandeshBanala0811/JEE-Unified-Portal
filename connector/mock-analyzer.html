@@ -39,18 +39,8 @@
         </div>
         <div>
           <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-100">Guardian Authentication</h2>
-          <p class="text-[10px] text-zinc-500">Access your local or cloud database partition</p>
+          <p class="text-[10px] text-zinc-500">Access your cloud database partition</p>
         </div>
-      </div>
-      
-      <!-- Database Mode Selector -->
-      <div class="grid grid-cols-2 gap-2 mb-4">
-        <button onclick="toggleLoginMode('local')" id="btn-mode-local" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-cyan-500/30 bg-cyan-500/10 text-cyan-400">
-          Browser Storage
-        </button>
-        <button onclick="toggleLoginMode('cloud')" id="btn-mode-cloud" class="py-1.5 text-center text-[10px] font-bold rounded uppercase border border-zinc-800 bg-zinc-950/45 text-zinc-500 hover:border-zinc-700">
-          Supabase Cloud
-        </button>
       </div>
 
       <form onsubmit="handleProfileSelection(event)" class="space-y-4 text-xs">
@@ -59,27 +49,14 @@
           <label for="profile-input" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Username Profile</label>
           <input type="text" id="profile-input" required placeholder="e.g., Arjun_JEE" pattern="^[a-zA-Z0-9_\-]+$" title="Alphanumeric, underscores, or hyphens only." class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
         </div>
-
-        <!-- Supabase Credentials (Visible only in cloud mode) -->
-        <div id="cloud-credentials-fields" class="hidden space-y-3 pt-2 border-t border-zinc-800/80">
-          <div>
-            <label for="supabase-url" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Supabase URL</label>
-            <input type="url" id="supabase-url" placeholder="https://yourproject.supabase.co" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
-          </div>
-          <div>
-            <label for="supabase-key" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Supabase Anon Key</label>
-            <input type="password" id="supabase-key" placeholder="your-anon-public-api-key" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
-          </div>
-        </div>
-
-        <button type="submit" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold uppercase rounded text-xs transition">
-          Access Registry
+        <button type="submit" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold uppercase rounded flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="shield-check" class="w-4 h-4"></i> Enter Workspace
         </button>
       </form>
     </div>
   </div>
 
-  <!-- Unified Technical Header (Synced with Command Center) -->
+  <!-- Unified Technical Header -->
   <header class="border-b border-zinc-800 bg-zinc-950/90 sticky top-0 z-40 text-xs">
     <!-- Upper Strip: Brand & Profile Control -->
     <div class="border-b border-zinc-900 bg-zinc-900/40">
@@ -115,9 +92,6 @@
       <nav class="flex items-center gap-5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 custom-scrollbar">
         <a href="../index.html" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
           <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i> Portal Home
-        </a>
-        <a href="./command-center.html" class="text-zinc-400 hover:text-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5">
-          <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Command Center
         </a>
         <a href="./mock-analyzer.html" class="text-cyan-400 border-b border-cyan-400 transition flex items-center gap-1.5 shrink-0 py-0.5 font-bold">
           <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Mock Analyzer
@@ -469,21 +443,33 @@
       ]
     };
 
-    // Shared Client Credentials (Aligned with mpc_v3 system)
-    let activeUser = localStorage.getItem('mpc_v3_user') || "";
-    let loginMode = "local"; // "local" or "cloud"
-    
-    // Cloud Credentials Cache (Aligned with mpc_v3 system)
-    let cloudUrl = localStorage.getItem('mpc_v3_url') || "";
-    let cloudKey = localStorage.getItem('mpc_v3_key') || "";
+    // =========================================================================
+    // SUPABASE CREDENTIALS CONFIGURATION
+    // =========================================================================
+    const SUPABASE_URL = 'https://dbtcyrrcsivehdqqgmie.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_HCOoHkKL2mYeYn6lbMmYDg_TtDab8yA';
+    // =========================================================================
+
+    // Shared Client Session Identifier
+    let activeUser = localStorage.getItem('mpc_companion_user') || localStorage.getItem('mpc_v3_user') || "";
     
     // Database SDK Client
     let supabaseClient = null;
 
     let mockTests = [];
     let checkpoints = [];
-    let logs = []; // Fetched study logs for multi-device revision verification
     let selectedDiff = "";
+
+    // Initialize Connection (With safeguard checks & REST endpoint filter)
+    if (SUPABASE_URL && SUPABASE_URL !== 'YOUR_SUPABASE_PROJECT_URL' && !SUPABASE_URL.includes('your-project-id')) {
+      try {
+        // Strip trailing slash and trailing path elements to standard domain format
+        const cleanUrl = SUPABASE_URL.replace(/\/rest\/v1\/?$/, '').trim();
+        supabaseClient = supabase.createClient(cleanUrl, SUPABASE_ANON_KEY);
+      } catch (err) {
+        console.error("Initialization issue with Supabase SDK Client:", err);
+      }
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       const todayString = new Date().toISOString().split('T')[0];
@@ -532,66 +518,27 @@
       return label;
     }
 
-    // Toggle Login Panel tab modes
-    function toggleLoginMode(mode) {
-      loginMode = mode;
-      const btnLocal = document.getElementById('btn-mode-local');
-      const btnCloud = document.getElementById('btn-mode-cloud');
-      const cloudFields = document.getElementById('cloud-credentials-fields');
-
-      if (mode === 'cloud') {
-        btnCloud.className = "flex-1 py-1.5 text-center text-[10px] font-bold rounded uppercase border border-cyan-500/30 bg-cyan-500/10 text-cyan-400";
-        btnLocal.className = "flex-1 py-1.5 text-center text-[10px] font-bold rounded uppercase border border-zinc-800 bg-zinc-950/45 text-zinc-500 hover:border-zinc-700";
-        cloudFields.classList.remove('hidden');
-        
-        document.getElementById('supabase-url').value = cloudUrl;
-        document.getElementById('supabase-key').value = cloudKey;
-      } else {
-        btnLocal.className = "flex-1 py-1.5 text-center text-[10px] font-bold rounded uppercase border border-cyan-500/30 bg-cyan-500/10 text-cyan-400";
-        btnCloud.className = "flex-1 py-1.5 text-center text-[10px] font-bold rounded uppercase border border-zinc-800 bg-zinc-950/45 text-zinc-500 hover:border-zinc-700";
-        cloudFields.classList.add('hidden');
-      }
-    }
-
     // Profile Modal authentication verification
     function verifyProfileSession() {
       const modal = document.getElementById('profile-modal');
+      const modeBadge = document.getElementById('app-mode-badge');
+
       if (!activeUser) {
         modal.classList.remove('hidden');
-        if (cloudUrl && cloudKey) {
-          toggleLoginMode('cloud');
-        }
       } else {
         modal.classList.add('hidden');
         document.getElementById('active-user-display').innerText = activeUser.toUpperCase();
-        initDatabaseConnection();
-      }
-    }
-
-    function initDatabaseConnection() {
-      cloudUrl = localStorage.getItem('mpc_v3_url') || "";
-      cloudKey = localStorage.getItem('mpc_v3_key') || "";
-      
-      const modeBadge = document.getElementById('app-mode-badge');
-
-      if (cloudUrl && cloudKey) {
-        try {
-          supabaseClient = supabase.createClient(cloudUrl, cloudKey);
+        
+        if (supabaseClient) {
           modeBadge.innerText = "CLOUD";
           modeBadge.className = "text-emerald-400 text-xs font-bold px-1 border border-emerald-500/20 bg-emerald-950/20 rounded";
-        } catch (err) {
-          console.error("Supabase config error:", err);
-          supabaseClient = null;
+        } else {
           modeBadge.innerText = "OFFLINE";
           modeBadge.className = "text-cyan-400 text-xs font-bold px-1 border border-cyan-500/20 bg-cyan-950/20 rounded";
         }
-      } else {
-        supabaseClient = null;
-        modeBadge.innerText = "OFFLINE";
-        modeBadge.className = "text-cyan-400 text-xs font-bold px-1 border border-cyan-500/20 bg-cyan-950/20 rounded";
+
+        loadProfileDatabases();
       }
-      
-      loadProfileDatabases();
     }
 
     function handleProfileSelection(e) {
@@ -603,90 +550,57 @@
         return;
       }
 
-      if (loginMode === 'cloud') {
-        const urlInput = document.getElementById('supabase-url').value.trim();
-        const keyInput = document.getElementById('supabase-key').value.trim();
-
-        if (!urlInput || !keyInput) {
-          showToast("Cloud parameters cannot be empty.", "rose");
-          return;
-        }
-
-        localStorage.setItem('mpc_v3_url', urlInput);
-        localStorage.setItem('mpc_v3_key', keyInput);
-      } else {
-        localStorage.removeItem('mpc_v3_url');
-        localStorage.removeItem('mpc_v3_key');
-      }
-
-      activeUser = userValue;
-      localStorage.setItem('mpc_v3_user', activeUser);
+      activeUser = userValue.toLowerCase();
+      localStorage.setItem('mpc_companion_user', activeUser);
       verifyProfileSession();
     }
 
     function switchProfile() {
       activeUser = "";
+      localStorage.removeItem('mpc_companion_user');
       localStorage.removeItem('mpc_v3_user');
       document.getElementById('profile-input').value = "";
       verifyProfileSession();
     }
 
-    // Dynamic Loader: Cloud or Fallback Local Partition
+    // Dynamic Loader: Cloud Sync or Local Storage Fallback
     async function loadProfileDatabases() {
       if (supabaseClient) {
         showToast("Synchronizing with Cloud DB...", "cyan");
         try {
-          const { data: testData, error: tErr } = await supabaseClient
-            .from('mpc_mock_tests')
-            .select('*')
-            .eq('username', activeUser)
-            .order('created_at', { ascending: false });
+          const { data, error } = await supabaseClient
+            .from('user_data')
+            .select('mock_tests, checkpoints')
+            .eq('username', activeUser.toLowerCase())
+            .single();
 
-          const { data: cpData, error: cErr } = await supabaseClient
-            .from('mpc_checkpoints')
-            .select('*')
-            .eq('username', activeUser);
+          if (error) {
+            // PGRST116 indicates no user profile row exists yet
+            if (error.code === 'PGRST116') {
+              const { error: insertError } = await supabaseClient
+                .from('user_data')
+                .insert([{ username: activeUser.toLowerCase(), mock_tests: [], checkpoints: [] }]);
+              
+              if (insertError) throw insertError;
+              
+              mockTests = [];
+              checkpoints = [];
+            } else {
+              throw error;
+            }
+          } else if (data) {
+            mockTests = data.mock_tests || [];
+            checkpoints = data.checkpoints || [];
+          }
 
-          // Attempt to pull raw study logs for dynamic cross-validation of revisions
-          const { data: logData } = await supabaseClient
-            .from('mpc_study_logs')
-            .select('chapter, timestamp')
-            .eq('username', activeUser)
-            .order('created_at', { ascending: false });
-
-          if (tErr || cErr) throw (tErr || cErr);
-
-          mockTests = (testData || []).map(t => ({
-            id: t.id,
-            name: t.name,
-            maxMarks: t.max_marks,
-            maths: t.maths,
-            phys: t.phys,
-            chem: t.chem,
-            total: t.total,
-            date: t.date,
-            mathsChapters: t.maths_chapters || [],
-            physicsChapters: t.physics_chapters || [],
-            chemistryChapters: t.chemistry_chapters || []
-          }));
-
-          checkpoints = (cpData || []).map(c => ({
-            id: c.id,
-            subject: c.subject,
-            chapter: c.chapter,
-            confidence: c.confidence,
-            date: c.date
-          }));
-
-          logs = (logData || []).map(l => ({
-            chapter: l.chapter,
-            timestamp: l.timestamp
-          }));
+          // Cache locally
+          localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
+          localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
 
           showToast("Cloud Sync Successful", "emerald");
         } catch (err) {
           console.warn("Cloud connection error. Loading local browser data:", err);
-          showToast("Cloud Sync Error. Falling back locally.", "rose");
+          showToast("Cloud connection error. Loaded local copy.", "rose");
           loadLocalBackup();
         }
       } else {
@@ -698,7 +612,6 @@
     function loadLocalBackup() {
       mockTests = JSON.parse(localStorage.getItem(`mpc_companion_tests_${activeUser}`)) || [];
       checkpoints = JSON.parse(localStorage.getItem(`mpc_companion_revisions_${activeUser}`)) || [];
-      logs = JSON.parse(localStorage.getItem(`mpc_v3_logs_${activeUser}`)) || []; // backup load
     }
 
     // Populate Dynamic Cascading Chapter Selector
@@ -737,10 +650,6 @@
             (lvl === 'Easy' ? 'emerald' : lvl === 'Medium' ? 'amber' : 'red') + "-500/40 rounded transition";
         }
       });
-    }
-
-    function updateFocusRatingDisplay(val) {
-      document.getElementById('focus-rating-display').innerText = ratingDescriptions[val] || `${val} // Rated`;
     }
 
     /* Operations Writers */
@@ -785,23 +694,12 @@
 
       if (supabaseClient) {
         const { error } = await supabaseClient
-          .from('mpc_mock_tests')
-          .insert({
-            id: mockEntry.id,
-            username: activeUser,
-            name: mockEntry.name,
-            max_marks: mockEntry.maxMarks,
-            maths: mockEntry.maths,
-            phys: mockEntry.phys,
-            chem: mockEntry.chem,
-            total: mockEntry.total,
-            date: mockEntry.date,
-            maths_chapters: mockEntry.mathsChapters,
-            physics_chapters: mockEntry.physicsChapters,
-            chemistry_chapters: mockEntry.chemistryChapters
-          });
+          .from('user_data')
+          .update({ mock_tests: mockTests })
+          .eq('username', activeUser.toLowerCase());
+        
         if (error) {
-          console.error("Cloud Error:", error);
+          console.error("Cloud Write Error:", error);
           showToast("Written locally. Cloud synchronization error.", "amber");
         }
       }
@@ -836,27 +734,17 @@
         date
       };
 
+      // Filter duplicates of this specific chapter before registering
       checkpoints = checkpoints.filter(cp => cp.chapter !== chapter);
       checkpoints.unshift(checkpointEntry);
+      
       localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
 
       if (supabaseClient) {
-        await supabaseClient
-          .from('mpc_checkpoints')
-          .delete()
-          .eq('username', activeUser)
-          .eq('chapter', chapter);
-
         const { error } = await supabaseClient
-          .from('mpc_checkpoints')
-          .insert({
-            id: checkpointEntry.id,
-            username: activeUser,
-            subject: checkpointEntry.subject,
-            chapter: checkpointEntry.chapter,
-            confidence: checkpointEntry.confidence,
-            date: checkpointEntry.date
-          });
+          .from('user_data')
+          .update({ checkpoints: checkpoints })
+          .eq('username', activeUser.toLowerCase());
         
         if (error) {
           console.error("Cloud write error:", error);
@@ -886,7 +774,11 @@
       localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
 
       if (supabaseClient) {
-        const { error } = await supabaseClient.from('mpc_mock_tests').delete().eq('id', id);
+        const { error } = await supabaseClient
+          .from('user_data')
+          .update({ mock_tests: mockTests })
+          .eq('username', activeUser.toLowerCase());
+        
         if (error) console.error("Cloud deletion issues:", error);
       }
 
@@ -895,26 +787,20 @@
     }
 
     async function deleteCheckpointRecord(id) {
-      const target = checkpoints.find(c => c.id === id);
       checkpoints = checkpoints.filter(c => c.id !== id);
       localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
 
-      if (supabaseClient && target) {
+      if (supabaseClient) {
         const { error } = await supabaseClient
-          .from('mpc_checkpoints')
-          .delete()
-          .eq('id', id);
+          .from('user_data')
+          .update({ checkpoints: checkpoints })
+          .eq('username', activeUser.toLowerCase());
+        
         if (error) console.error("Cloud deletion issues:", error);
       }
 
       refreshDashboard();
       showToast("Checkpoint record cleared.", "rose");
-    }
-
-    function saveState() {
-      if (!activeUser) return;
-      localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
-      localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
     }
 
     async function resetAllData() {
@@ -923,14 +809,18 @@
         localStorage.removeItem(`mpc_companion_tests_${activeUser}`);
         localStorage.removeItem(`mpc_companion_revisions_${activeUser}`);
         
-        if (supabaseClient) {
-          const { error: tErr } = await supabaseClient.from('mpc_mock_tests').delete().eq('username', activeUser);
-          const { error: cErr } = await supabaseClient.from('mpc_checkpoints').delete().eq('username', activeUser);
-          if (tErr || cErr) console.error("Cloud reset issues:", tErr || cErr);
-        }
-
         mockTests = [];
         checkpoints = [];
+
+        if (supabaseClient) {
+          const { error } = await supabaseClient
+            .from('user_data')
+            .update({ mock_tests: [], checkpoints: [] })
+            .eq('username', activeUser.toLowerCase());
+          
+          if (error) console.error("Cloud reset issues:", error);
+        }
+
         refreshDashboard();
         showToast("Database reset.", "rose");
       }
@@ -1017,14 +907,6 @@
       checkpoints.forEach(cp => {
         if (!latestCheckpointDate[cp.chapter]) {
           latestCheckpointDate[cp.chapter] = new Date(cp.date);
-        }
-      });
-
-      // CONNECTION FEATURE: Integrate daily study logs as virtual revision checkpoints
-      logs.forEach(log => {
-        const logDate = new Date(log.timestamp);
-        if (!latestCheckpointDate[log.chapter] || logDate > latestCheckpointDate[log.chapter]) {
-          latestCheckpointDate[log.chapter] = logDate;
         }
       });
 
