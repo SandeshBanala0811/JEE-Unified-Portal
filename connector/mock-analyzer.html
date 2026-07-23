@@ -10,23 +10,10 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    /* Custom technical scrollbar styling */
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #111827;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #374151;
-      border-radius: 2px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #4b5563;
-    }
-  </style>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Link to External Stylesheet -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen font-mono selection:bg-cyan-500 selection:text-black">
 
@@ -76,9 +63,12 @@
       </nav>
 
       <!-- Dynamic Micro-Metrics -->
-      <div class="flex items-center gap-4 text-[10px] text-zinc-500 font-semibold uppercase tracking-wider shrink-0 w-full md:w-auto justify-end border-t border-zinc-900/50 md:border-none pt-2 md:pt-0">
+      <div class="flex items-center gap-3 text-[10px] text-zinc-500 font-semibold uppercase tracking-wider shrink-0 w-full md:w-auto justify-end border-t border-zinc-900/50 md:border-none pt-2 md:pt-0">
         <span class="flex items-center gap-1 bg-zinc-950 px-2 py-1 rounded border border-zinc-900">
           Critical Backlogs: <span id="global-backlog-count" class="font-bold text-red-400">0</span>
+        </span>
+        <span class="flex items-center gap-1 bg-zinc-950 px-2 py-1 rounded border border-zinc-900">
+          Total Assessments: <span id="global-test-count" class="font-bold text-cyan-400">0</span>
         </span>
       </div>
     </div>
@@ -88,10 +78,12 @@
   <div id="toast-container" class="fixed top-16 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Primary Dashboard Grid -->
-  <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+  <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+    
+    <!-- TOP SECTION: Inputs and Ledger Logs -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
-      <!-- LEFT MODULE: Mock Test Analytics Platform -->
+      <!-- LEFT MODULE: Mock Test Score Registry & Exam Ledger -->
       <div class="lg:col-span-6 space-y-6">
         
         <!-- Log Mock Exam Card -->
@@ -101,15 +93,30 @@
           </h2>
 
           <form id="mock-form" onsubmit="handleMockSubmit(event)" class="space-y-4 text-xs">
-            <!-- Test Meta Row -->
-            <div class="grid grid-cols-2 gap-3">
+            
+            <!-- Dynamic Exam Type Selector -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label for="mock-name" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Exam Reference Name</label>
-                <input type="text" id="mock-name" required placeholder="e.g., Mains Revision 4" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
+                <label for="mock-type" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Exam Category</label>
+                <select id="mock-type" onchange="handleExamTypeChange()" required class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
+                  <option value="JEE Mains" selected>JEE Mains (Default: 300 Marks)</option>
+                  <option value="JEE Advanced">JEE Advanced (Custom Marks)</option>
+                  <option value="BITSAT">BITSAT (Default: 390 Marks)</option>
+                  <option value="EAMCET">EAMCET (Default: 160 Marks)</option>
+                  <option value="Custom">Custom Exam</option>
+                </select>
               </div>
-              <div>
+
+              <!-- Conditional Total Marks (Only shown on Advanced/Custom choices) -->
+              <div id="mock-max-container" class="hidden">
                 <label for="mock-max" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Total Paper Marks</label>
-                <input type="number" id="mock-max" required min="1" placeholder="e.g., 300" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
+                <input type="number" id="mock-max" min="1" placeholder="e.g., 360" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
+              </div>
+
+              <!-- Conditional Custom Exam Name (Only shown on Custom choice) -->
+              <div id="mock-name-container" class="hidden col-span-1 md:col-span-2">
+                <label for="mock-name" class="block text-[10px] uppercase font-bold text-zinc-500 mb-1.5">Custom Exam Reference Name</label>
+                <input type="text" id="mock-name" placeholder="e.g., Chapter Mock 03" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-zinc-200 focus:outline-none focus:border-cyan-500 transition">
               </div>
             </div>
 
@@ -172,52 +179,21 @@
           </form>
         </div>
 
-        <!-- Subject Weakness & Accuracy Analytics -->
-        <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded">
-          <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mb-4 border-b border-zinc-800 pb-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> 02 // Subject Mastery Analysis
-          </h2>
-
-          <div class="space-y-4">
-            <!-- Maths Avg -->
-            <div>
-              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
-                <span>MATHEMATICS AVG ACCURACY</span>
-                <span id="maths-avg-pct" class="text-cyan-400">0%</span>
-              </div>
-              <div class="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
-                <div id="maths-avg-bar" class="bg-cyan-500 h-full w-0 transition-all duration-300"></div>
-              </div>
-            </div>
-
-            <!-- Physics Avg -->
-            <div>
-              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
-                <span>PHYSICS AVG ACCURACY</span>
-                <span id="physics-avg-pct" class="text-amber-500">0%</span>
-              </div>
-              <div class="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
-                <div id="physics-avg-bar" class="bg-amber-500 h-full w-0 transition-all duration-300"></div>
-              </div>
-            </div>
-
-            <!-- Chemistry Avg -->
-            <div>
-              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
-                <span>CHEMISTRY AVG ACCURACY</span>
-                <span id="chemistry-avg-pct" class="text-emerald-500">0%</span>
-              </div>
-              <div class="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
-                <div id="chemistry-avg-bar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Recorded Exams History Log -->
         <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded">
           <p class="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-1.5 mb-3">Mock Exam History Ledger</p>
-          <div id="mock-test-ledger" class="space-y-2 max-h-[180px] overflow-y-auto custom-scrollbar">
+          
+          <!-- Interactive Filter & Sort controls -->
+          <div class="flex gap-2 mb-3 text-[10px]">
+            <input type="text" id="ledger-search" oninput="refreshDashboard()" placeholder="Search exams..." class="flex-1 bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-zinc-300 focus:outline-none focus:border-cyan-500 transition">
+            <select id="ledger-sort" onchange="refreshDashboard()" class="bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-zinc-300 focus:outline-none focus:border-cyan-500">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="highest">Highest Score</option>
+            </select>
+          </div>
+
+          <div id="mock-test-ledger" class="space-y-2 max-h-[220px] overflow-y-auto custom-scrollbar">
             <!-- Dynamic -->
           </div>
         </div>
@@ -295,7 +271,7 @@
         <!-- Active Chapter Checkpoints Log -->
         <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded">
           <p class="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-1.5 mb-3">Revision Checkpoint Ledger</p>
-          <div id="checkpoint-ledger" class="space-y-2 max-h-[180px] overflow-y-auto custom-scrollbar">
+          <div id="checkpoint-ledger" class="space-y-2 max-h-[220px] overflow-y-auto custom-scrollbar">
             <!-- Generated programmatically -->
           </div>
         </div>
@@ -303,768 +279,77 @@
       </div>
 
     </div>
+
+    <!-- BOTTOM SECTION: Side-by-Side Performance Analytics -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 border-t border-zinc-900 pt-6">
+      
+      <!-- Left Analytics Column: Subject Mastery & Radar chart -->
+      <div class="lg:col-span-6 space-y-6">
+        <!-- Subject Weakness & Accuracy Analytics -->
+        <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded h-full">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mb-4 border-b border-zinc-800 pb-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> 02 // Subject Mastery Analysis
+          </h2>
+
+          <div class="space-y-4">
+            <!-- Maths Avg -->
+            <div>
+              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
+                <span>MATHEMATICS AVG ACCURACY</span>
+                <span id="maths-avg-pct" class="text-cyan-400">0%</span>
+              </div>
+              <div class="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
+                <div id="maths-avg-bar" class="bg-cyan-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+
+            <!-- Physics Avg -->
+            <div>
+              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
+                <span>PHYSICS AVG ACCURACY</span>
+                <span id="physics-avg-pct" class="text-amber-500">0%</span>
+              </div>
+              <div class="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
+                <div id="physics-avg-bar" class="bg-amber-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+
+            <!-- Chemistry Avg -->
+            <div>
+              <div class="flex justify-between text-[11px] mb-1 font-semibold text-zinc-400">
+                <span>CHEMISTRY AVG ACCURACY</span>
+                <span id="chemistry-avg-pct" class="text-emerald-500">0%</span>
+              </div>
+              <div class="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
+                <div id="chemistry-avg-bar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Radar Chart for Subject Prep Balance -->
+          <div class="h-44 w-full mt-6 flex items-center justify-center">
+            <canvas id="subjectBalanceChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Analytics Column: Previous Exam Velocity Deltas -->
+      <div class="lg:col-span-6 space-y-6">
+        <!-- 02.5 // Delta Velocity Analysis (Previous Exam Comparison) -->
+        <div class="border border-zinc-800 bg-zinc-900/40 p-5 rounded h-full">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mb-4 border-b border-zinc-800 pb-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> Previous Exam Marks Analysis
+          </h2>
+          <div id="delta-analysis-container" class="space-y-4">
+            <!-- Dynamic data comparison metrics load here -->
+          </div>
+        </div>
+      </div>
+
+    </div>
   </main>
 
-  <!-- Interactive Logic -->
-  <script>
-    // Master Verified Complete Syllabus
-    const SYLLABUS_DATA = {
-      "Mathematics": [
-        "Sets, Relations & Functions",
-        "Trigonometric Ratios & Transformations",
-        "Trigonometric Equations",
-        "Inverse Trigonometric Functions",
-        "Hyperbolic Functions",
-        "Properties of Triangles & Heights & Distances",
-        "Complex Numbers & De Moivre’s Theorem",
-        "Quadratic Equations & Expressions",
-        "Theory of Equations",
-        "Linear Inequalities",
-        "Permutations & Combinations",
-        "Mathematical Induction",
-        "Binomial Theorem",
-        "Sequences and Series (AP, GP, HP)",
-        "Partial Fractions",
-        "Matrices & Determinants",
-        "Addition of Vectors",
-        "Product of Vectors",
-        "Locus & Transformation of Axes",
-        "The Straight Line",
-        "Pair of Straight Lines",
-        "Circle & System of Circles",
-        "Parabola",
-        "Ellipse",
-        "Hyperbola",
-        "Three-Dimensional Geometry (Coordinates, Lines & Planes)",
-        "Direction Cosines & Direction Ratios",
-        "The Plane",
-        "Limits and Continuity",
-        "Differentiation (Methods of Differentiation)",
-        "Applications of Derivatives (Tangents, Monotonicity, Maxima-Minima)",
-        "Indefinite Integration",
-        "Definite Integrals & Area Under Curves",
-        "Differential Equations",
-        "Measures of Dispersion & Statistics",
-        "Probability & Random Variables",
-        "Mathematical Reasoning"
-      ],
-      "Physics": [
-        "Physical World & Units and Measurements",
-        "Motion in a Straight Line (Kinematics 1D)",
-        "Motion in a Plane (Vectors, Projectile & Circular)",
-        "Laws of Motion & Friction",
-        "Work, Energy and Power",
-        "System of Particles and Centre of Mass",
-        "Rotational Motion & Rigid Body Dynamics",
-        "Gravitation",
-        "Mechanical Properties of Solids (Elasticity)",
-        "Mechanical Properties of Fluids (Hydrostatics, Viscosity & Surface Tension)",
-        "Thermal Properties of Matter & Calorimetry",
-        "Thermodynamics",
-        "Kinetic Theory of Gases",
-        "Oscillations (Simple Harmonic Motion)",
-        "Waves & Sound Waves",
-        "Electric Charges and Fields (Electrostatics I)",
-        "Electrostatic Potential and Capacitance (Electrostatics II)",
-        "Current Electricity",
-        "Moving Charges and Magnetism (Magnetic Effects of Current)",
-        "Magnetism and Matter",
-        "Electromagnetic Induction (EMI)",
-        "Alternating Current (AC)",
-        "Electromagnetic Waves",
-        "Ray Optics and Optical Instruments",
-        "Wave Optics (Interference, Diffraction & Polarization)",
-        "Dual Nature of Radiation and Matter",
-        "Atoms & Atomic Structure",
-        "Nuclei & Nuclear Physics",
-        "Semiconductor Electronics & Logic Gates",
-        "Communication Systems",
-        "Experimental Physics & Error Analysis"
-      ],
-      "Chemistry": [
-        "Some Basic Concepts of Chemistry (Mole Concept & Stoichiometry)",
-        "Structure of Atom",
-        "Classification of Elements and Periodicity",
-        "Chemical Bonding and Molecular Structure",
-        "States of Matter: Gases and Liquids",
-        "Chemical Thermodynamics & Energetics",
-        "Chemical Equilibrium",
-        "Ionic Equilibrium & Acid-Bases",
-        "Redox Reactions & Oxidation Numbers",
-        "Hydrogen and its Compounds",
-        "s-Block Elements (Alkali & Alkaline Earth Metals)",
-        "p-Block Elements: Group 13 & 14 (Boron & Carbon Families)",
-        "Environmental Chemistry",
-        "General Organic Chemistry (GOC & Isomerism)",
-        "Hydrocarbons (Alkanes, Alkenes, Alkynes & Arenes)",
-        "Solid State",
-        "Solutions & Colligative Properties",
-        "Electrochemistry",
-        "Chemical Kinetics",
-        "Surface Chemistry",
-        "General Principles and Processes of Isolation of Elements (Metallurgy)",
-        "p-Block Elements: Group 15, 16, 17 & 18",
-        "d and f Block Elements",
-        "Coordination Compounds & Organometallics",
-        "Haloalkanes and Haloarenes",
-        "Alcohols, Phenols and Ethers",
-        "Aldehydes, Ketones and Carboxylic Acids",
-        "Organic Compounds Containing Nitrogen (Amines & Diazonium Salts)",
-        "Biomolecules",
-        "Polymers",
-        "Chemistry in Everyday Life",
-        "Practical & Analytical Chemistry (Salt Analysis)"
-      ]
-    };
-
-    // =========================================================================
-    // SUPABASE CREDENTIALS CONFIGURATION
-    // =========================================================================
-    const SUPABASE_URL = 'https://dbtcyrrcsivehdqqgmie.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_HCOoHkKL2mYeYn6lbMmYDg_TtDab8yA';
-    // =========================================================================
-
-    // Shared Client Session Identifier
-    let activeUser = localStorage.getItem('mpc_companion_user') || localStorage.getItem('mpc_v3_user') || "";
-    
-    // Database SDK Client
-    let supabaseClient = null;
-
-    let mockTests = [];
-    let checkpoints = [];
-    let selectedDiff = "";
-
-    // Initialize Connection (With safeguard checks & REST endpoint filter)
-    if (SUPABASE_URL && SUPABASE_URL !== 'YOUR_SUPABASE_PROJECT_URL' && !SUPABASE_URL.includes('your-project-id')) {
-      try {
-        // Strip trailing slash and trailing path elements to standard domain format
-        const cleanUrl = SUPABASE_URL.replace(/\/rest\/v1\/?$/, '').trim();
-        supabaseClient = supabase.createClient(cleanUrl, SUPABASE_ANON_KEY);
-      } catch (err) {
-        console.error("Initialization issue with Supabase SDK Client:", err);
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const todayString = new Date().toISOString().split('T')[0];
-      document.getElementById('mock-date').value = todayString;
-      document.getElementById('checkpoint-date').value = todayString;
-
-      populateMockLists();
-      lucide.createIcons();
-      verifyProfileSession();
-    });
-
-    // Populate scroll boxes with multi-select checkboxes
-    function populateMockLists() {
-      const mathBox = document.getElementById('mock-math-chaps');
-      const physBox = document.getElementById('mock-phys-chaps');
-      const chemBox = document.getElementById('mock-chem-chaps');
-
-      SYLLABUS_DATA["Mathematics"].forEach(ch => {
-        mathBox.appendChild(createCheckboxItem("math-ch", ch));
-      });
-      SYLLABUS_DATA["Physics"].forEach(ch => {
-        physBox.appendChild(createCheckboxItem("phys-ch", ch));
-      });
-      SYLLABUS_DATA["Chemistry"].forEach(ch => {
-        chemBox.appendChild(createCheckboxItem("chem-ch", ch));
-      });
-    }
-
-    function createCheckboxItem(prefix, name) {
-      const label = document.createElement('label');
-      label.className = "flex items-center gap-1.5 px-1 py-0.5 hover:bg-zinc-900 rounded cursor-pointer select-none text-[9px] text-zinc-400";
-      
-      const input = document.createElement('input');
-      input.type = "checkbox";
-      input.name = prefix;
-      input.value = name;
-      input.className = "rounded bg-zinc-900 border-zinc-800 text-cyan-500 focus:ring-0 w-3 h-3";
-      
-      const span = document.createElement('span');
-      span.className = "truncate";
-      span.textContent = name;
-      span.title = name;
-
-      label.appendChild(input);
-      label.appendChild(span);
-      return label;
-    }
-
-    // Profile Modal authentication verification (Redirects to Portal Home if no session)
-    function verifyProfileSession() {
-      const modeBadge = document.getElementById('app-mode-badge');
-
-      if (!activeUser) {
-        // Redirect to main portal home page to log in
-        window.location.href = "../index.html";
-        return;
-      } else {
-        document.getElementById('active-user-display').innerText = activeUser.toUpperCase();
-        
-        if (supabaseClient) {
-          modeBadge.innerText = "CLOUD";
-          modeBadge.className = "text-emerald-400 text-xs font-bold px-1 border border-emerald-500/20 bg-emerald-950/20 rounded";
-        } else {
-          modeBadge.innerText = "OFFLINE";
-          modeBadge.className = "text-cyan-400 text-xs font-bold px-1 border border-cyan-500/20 bg-cyan-950/20 rounded";
-        }
-
-        loadProfileDatabases();
-      }
-    }
-
-    function switchProfile() {
-      activeUser = "";
-      localStorage.removeItem('mpc_companion_user');
-      localStorage.removeItem('mpc_v3_user');
-      verifyProfileSession();
-    }
-
-    // Dynamic Loader: Cloud Sync or Local Storage Fallback
-    async function loadProfileDatabases() {
-      if (supabaseClient) {
-        showToast("Synchronizing with Cloud DB...", "cyan");
-        try {
-          const { data, error } = await supabaseClient
-            .from('user_data')
-            .select('mock_tests, checkpoints')
-            .eq('username', activeUser.toLowerCase())
-            .single();
-
-          if (error) {
-            // PGRST116 indicates no user profile row exists yet
-            if (error.code === 'PGRST116') {
-              const { error: insertError } = await supabaseClient
-                .from('user_data')
-                .insert([{ username: activeUser.toLowerCase(), mock_tests: [], checkpoints: [] }]);
-              
-              if (insertError) throw insertError;
-              
-              mockTests = [];
-              checkpoints = [];
-            } else {
-              throw error;
-            }
-          } else if (data) {
-            mockTests = data.mock_tests || [];
-            checkpoints = data.checkpoints || [];
-          }
-
-          // Cache locally
-          localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
-          localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
-
-          showToast("Cloud Sync Successful", "emerald");
-        } catch (err) {
-          console.warn("Cloud connection error. Loading local browser data:", err);
-          showToast("Cloud connection error. Loaded local copy.", "rose");
-          loadLocalBackup();
-        }
-      } else {
-        loadLocalBackup();
-      }
-      refreshDashboard();
-    }
-
-    function loadLocalBackup() {
-      mockTests = JSON.parse(localStorage.getItem(`mpc_companion_tests_${activeUser}`)) || [];
-      checkpoints = JSON.parse(localStorage.getItem(`mpc_companion_revisions_${activeUser}`)) || [];
-    }
-
-    // Populate Dynamic Cascading Chapter Selector
-    function populateChapters() {
-      const subject = document.getElementById('subject-select').value;
-      const chapterSelect = document.getElementById('chapter-select');
-
-      chapterSelect.innerHTML = '<option value="" disabled selected>Select Chapter</option>';
-      
-      if (subject && SYLLABUS_DATA[subject]) {
-        SYLLABUS_DATA[subject].forEach(chapter => {
-          const option = document.createElement('option');
-          option.value = chapter;
-          option.textContent = chapter;
-          chapterSelect.appendChild(option);
-        });
-        chapterSelect.disabled = false;
-      } else {
-        chapterSelect.disabled = true;
-      }
-    }
-
-    function setDiffPill(level) {
-      selectedDiff = level;
-      document.getElementById('selected-diff').value = level;
-
-      ['Easy', 'Medium', 'Hard'].forEach(lvl => {
-        const pill = document.getElementById(`pill-${lvl}`);
-        if (lvl === level) {
-          pill.className = "py-1.5 text-center border font-semibold text-black rounded transition " + 
-            (lvl === 'Easy' ? 'bg-emerald-400 border-emerald-400' : 
-             lvl === 'Medium' ? 'bg-amber-400 border-amber-400' : 
-             'bg-red-400 border-red-400');
-        } else {
-          pill.className = "py-1.5 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-" + 
-            (lvl === 'Easy' ? 'emerald' : lvl === 'Medium' ? 'amber' : 'red') + "-500/40 rounded transition";
-        }
-      });
-    }
-
-    /* Operations Writers */
-    async function handleMockSubmit(e) {
-      e.preventDefault();
-
-      const name = document.getElementById('mock-name').value.trim();
-      const maxMarks = parseInt(document.getElementById('mock-max').value, 10);
-      const maths = parseInt(document.getElementById('mock-math').value, 10);
-      const phys = parseInt(document.getElementById('mock-phys').value, 10);
-      const chem = parseInt(document.getElementById('mock-chem').value, 10);
-      const date = document.getElementById('mock-date').value;
-
-      const mathsChapters = Array.from(document.querySelectorAll('input[name="math-ch"]:checked')).map(el => el.value);
-      const physicsChapters = Array.from(document.querySelectorAll('input[name="phys-ch"]:checked')).map(el => el.value);
-      const chemistryChapters = Array.from(document.querySelectorAll('input[name="chem-ch"]:checked')).map(el => el.value);
-
-      const total = maths + phys + chem;
-
-      if (total > maxMarks) {
-        showToast("Score cannot exceed paper maximum marks.", "rose");
-        return;
-      }
-
-      const mockEntry = {
-        id: 'mock_' + Date.now(),
-        name,
-        maxMarks,
-        maths,
-        phys,
-        chem,
-        total,
-        date,
-        mathsChapters,
-        physicsChapters,
-        chemistryChapters
-      };
-
-      mockTests.unshift(mockEntry);
-      
-      localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
-
-      if (supabaseClient) {
-        const { error } = await supabaseClient
-          .from('user_data')
-          .update({ mock_tests: mockTests })
-          .eq('username', activeUser.toLowerCase());
-        
-        if (error) {
-          console.error("Cloud Write Error:", error);
-          showToast("Written locally. Cloud synchronization error.", "amber");
-        }
-      }
-
-      refreshDashboard();
-
-      document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => cb.checked = false);
-      document.getElementById('mock-form').reset();
-      const todayString = new Date().toISOString().split('T')[0];
-      document.getElementById('mock-date').value = todayString;
-      showToast("Mock score registered.", "emerald");
-    }
-
-    async function handleCheckpointSubmit(e) {
-      e.preventDefault();
-
-      const subject = document.getElementById('subject-select').value;
-      const chapter = document.getElementById('chapter-select').value;
-      const confidence = document.getElementById('selected-diff').value;
-      const date = document.getElementById('checkpoint-date').value;
-
-      if (!confidence) {
-        showToast("Please choose confidence index.", "rose");
-        return;
-      }
-
-      const checkpointEntry = {
-        id: 'rev_' + Date.now(),
-        subject,
-        chapter,
-        confidence,
-        date
-      };
-
-      // Filter duplicates of this specific chapter before registering
-      checkpoints = checkpoints.filter(cp => cp.chapter !== chapter);
-      checkpoints.unshift(checkpointEntry);
-      
-      localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
-
-      if (supabaseClient) {
-        const { error } = await supabaseClient
-          .from('user_data')
-          .update({ checkpoints: checkpoints })
-          .eq('username', activeUser.toLowerCase());
-        
-        if (error) {
-          console.error("Cloud write error:", error);
-          showToast("Saved locally. Cloud synchronization issues.", "amber");
-        }
-      }
-
-      refreshDashboard();
-
-      document.getElementById('checkpoint-form').reset();
-      document.getElementById('chapter-select').disabled = true;
-      document.getElementById('chapter-select').innerHTML = '<option value="" disabled selected>Select Subject first</option>';
-      
-      selectedDiff = "";
-      document.getElementById('selected-diff').value = "";
-      ['Easy', 'Medium', 'Hard'].forEach(lvl => {
-        document.getElementById(`pill-${lvl}`).className = "py-1.5 text-center border border-zinc-800 bg-zinc-950/45 text-zinc-400 hover:border-" + (lvl === 'Easy' ? 'emerald' : lvl === 'Medium' ? 'amber' : 'red') + "-500/40 rounded transition";
-      });
-
-      const todayString = new Date().toISOString().split('T')[0];
-      document.getElementById('checkpoint-date').value = todayString;
-      showToast("Revision checkpoint registered.", "emerald");
-    }
-
-    async function deleteMockRecord(id) {
-      mockTests = mockTests.filter(t => t.id !== id);
-      localStorage.setItem(`mpc_companion_tests_${activeUser}`, JSON.stringify(mockTests));
-
-      if (supabaseClient) {
-        const { error } = await supabaseClient
-          .from('user_data')
-          .update({ mock_tests: mockTests })
-          .eq('username', activeUser.toLowerCase());
-        
-        if (error) console.error("Cloud deletion issues:", error);
-      }
-
-      refreshDashboard();
-      showToast("Mock record cleared.", "rose");
-    }
-
-    async function deleteCheckpointRecord(id) {
-      checkpoints = checkpoints.filter(c => c.id !== id);
-      localStorage.setItem(`mpc_companion_revisions_${activeUser}`, JSON.stringify(checkpoints));
-
-      if (supabaseClient) {
-        const { error } = await supabaseClient
-          .from('user_data')
-          .update({ checkpoints: checkpoints })
-          .eq('username', activeUser.toLowerCase());
-        
-        if (error) console.error("Cloud deletion issues:", error);
-      }
-
-      refreshDashboard();
-      showToast("Checkpoint record cleared.", "rose");
-    }
-
-    async function resetAllData() {
-      if (!activeUser) return;
-      if (confirm(`Wipe mock scores and revision benchmarks under "${activeUser}"?`)) {
-        localStorage.removeItem(`mpc_companion_tests_${activeUser}`);
-        localStorage.removeItem(`mpc_companion_revisions_${activeUser}`);
-        
-        mockTests = [];
-        checkpoints = [];
-
-        if (supabaseClient) {
-          const { error } = await supabaseClient
-            .from('user_data')
-            .update({ mock_tests: [], checkpoints: [] })
-            .eq('username', activeUser.toLowerCase());
-          
-          if (error) console.error("Cloud reset issues:", error);
-        }
-
-        refreshDashboard();
-        showToast("Database reset.", "rose");
-      }
-    }
-
-    /* Calculations & Board Sync */
-    function refreshDashboard() {
-      // 1. Calculate Average Score Accuracy Percentage
-      let mathSumPct = 0, physSumPct = 0, chemSumPct = 0;
-      let totalTestsCount = mockTests.length;
-
-      if (totalTestsCount > 0) {
-        mockTests.forEach(test => {
-          const subjectMaxMarks = test.maxMarks / 3;
-          mathSumPct += (test.maths / subjectMaxMarks) * 100;
-          physSumPct += (test.phys / subjectMaxMarks) * 100;
-          chemSumPct += (test.chem / subjectMaxMarks) * 100;
-        });
-
-        const mathAvg = Math.min(100, Math.round(mathSumPct / totalTestsCount));
-        const physAvg = Math.min(100, Math.round(physSumPct / totalTestsCount));
-        const chemAvg = Math.min(100, Math.round(chemSumPct / totalTestsCount));
-
-        document.getElementById('maths-avg-pct').innerText = `${mathAvg}%`;
-        document.getElementById('maths-avg-bar').style.width = `${mathAvg}%`;
-
-        document.getElementById('physics-avg-pct').innerText = `${physAvg}%`;
-        document.getElementById('physics-avg-bar').style.width = `${physAvg}%`;
-
-        document.getElementById('chemistry-avg-pct').innerText = `${chemAvg}%`;
-        document.getElementById('chemistry-avg-bar').style.width = `${chemAvg}%`;
-      } else {
-        ['maths', 'physics', 'chemistry'].forEach(sub => {
-          document.getElementById(`${sub}-avg-pct`).innerText = '0%';
-          document.getElementById(`${sub}-avg-bar`).style.width = '0%';
-        });
-      }
-
-      // 2. Populate Ledger list
-      const testLedger = document.getElementById('mock-test-ledger');
-      if (mockTests.length === 0) {
-        testLedger.innerHTML = '<p class="text-[10px] text-zinc-600 text-center py-12">No recorded mock exams registered.</p>';
-      } else {
-        testLedger.innerHTML = '';
-        mockTests.forEach(test => {
-          const pct = Math.round((test.total / test.maxMarks) * 100);
-          const colorMarker = pct >= 75 ? 'border-l-emerald-500' : pct >= 50 ? 'border-l-amber-500' : 'border-l-red-500';
-          const totalChapsLogged = (test.mathsChapters?.length || 0) + (test.physicsChapters?.length || 0) + (test.chemistryChapters?.length || 0);
-
-          const card = document.createElement('div');
-          card.className = `p-2.5 bg-zinc-950 border border-zinc-800/80 rounded border-l-2 ${colorMarker} flex justify-between items-center text-[10px]`;
-          card.innerHTML = `
-            <div class="min-w-0 flex-1 pr-2">
-              <span class="font-bold text-zinc-300 truncate block">${test.name}</span>
-              <div class="flex items-center gap-2 text-[8px] text-zinc-500 uppercase mt-0.5 font-semibold">
-                <span>Date: ${test.date}</span>
-                <span>Marks: ${test.total}/${test.maxMarks} (${pct}%)</span>
-                <span>Chaps: ${totalChapsLogged}</span>
-              </div>
-            </div>
-            <div class="flex items-center gap-3">
-              <div class="text-right text-[8px] text-zinc-400 font-bold hidden sm:block">
-                <span>M:${test.maths} P:${test.phys} C:${test.chem}</span>
-              </div>
-              <button onclick="deleteMockRecord('${test.id}')" class="text-zinc-600 hover:text-red-400 p-1 transition" title="Delete Score">
-                <i data-lucide="trash" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          `;
-          testLedger.appendChild(card);
-        });
-      }
-
-      // 3. Process Warnings & decay
-      const alertsFeed = document.getElementById('backlog-alerts-feed');
-      alertsFeed.innerHTML = '';
-
-      const now = new Date();
-      let urgentCount = 0;
-      let decayWarningsList = [];
-
-      // Create mapping of the latest checkpoint dates for resolution validation
-      const latestCheckpointDate = {};
-      checkpoints.forEach(cp => {
-        if (!latestCheckpointDate[cp.chapter]) {
-          latestCheckpointDate[cp.chapter] = new Date(cp.date);
-        }
-      });
-
-      // Part A: Process Mock Exam < 60% failures
-      mockTests.forEach(test => {
-        const testDate = new Date(test.date);
-        const maxSubMarks = test.maxMarks / 3;
-
-        if (test.mathsChapters && test.mathsChapters.length > 0) {
-          const mathPct = Math.round((test.maths / maxSubMarks) * 100);
-          if (mathPct < 60) {
-            test.mathsChapters.forEach(chap => {
-              const lastRevised = latestCheckpointDate[chap];
-              if (!lastRevised || lastRevised < testDate) {
-                decayWarningsList.push({
-                  chapter: chap,
-                  subject: "Mathematics",
-                  days: Math.floor(Math.abs(now - testDate) / (1000 * 60 * 60 * 24)),
-                  confidence: "Critical",
-                  label: `FAILED EXAM PERFORMANCE WARNING // SCORED ${mathPct}% IN MATHS ON EXAM "${test.name.toUpperCase()}"`
-                });
-                urgentCount++;
-              }
-            });
-          }
-        }
-
-        if (test.physicsChapters && test.physicsChapters.length > 0) {
-          const physPct = Math.round((test.phys / maxSubMarks) * 100);
-          if (physPct < 60) {
-            test.physicsChapters.forEach(chap => {
-              const lastRevised = latestCheckpointDate[chap];
-              if (!lastRevised || lastRevised < testDate) {
-                decayWarningsList.push({
-                  chapter: chap,
-                  subject: "Physics",
-                  days: Math.floor(Math.abs(now - testDate) / (1000 * 60 * 60 * 24)),
-                  confidence: "Critical",
-                  label: `FAILED EXAM PERFORMANCE WARNING // SCORED ${physPct}% IN PHYSICS ON EXAM "${test.name.toUpperCase()}"`
-                });
-                urgentCount++;
-              }
-            });
-          }
-        }
-
-        if (test.chemistryChapters && test.chemistryChapters.length > 0) {
-          const chemPct = Math.round((test.chem / maxSubMarks) * 100);
-          if (chemPct < 60) {
-            test.chemistryChapters.forEach(chap => {
-              const lastRevised = latestCheckpointDate[chap];
-              if (!lastRevised || lastRevised < testDate) {
-                decayWarningsList.push({
-                  chapter: chap,
-                  subject: "Chemistry",
-                  days: Math.floor(Math.abs(now - testDate) / (1000 * 60 * 60 * 24)),
-                  confidence: "Critical",
-                  label: `FAILED EXAM PERFORMANCE WARNING // SCORED ${chemPct}% IN CHEMISTRY ON EXAM "${test.name.toUpperCase()}"`
-                });
-                urgentCount++;
-              }
-            });
-          }
-        }
-      });
-
-      // Part B: Process Time Decay Revisions
-      checkpoints.forEach(cp => {
-        const cpDate = new Date(cp.date);
-        const elapsedDays = Math.floor(Math.abs(now - cpDate) / (1000 * 60 * 60 * 24));
-
-        let conditionMet = false;
-        let warningLabel = "";
-
-        if (cp.confidence === 'Hard' && elapsedDays > 7) {
-          conditionMet = true;
-          warningLabel = "HARD TOPIC ROT WARNING // NEGLECTED OVER 7 DAYS";
-        } else if (cp.confidence === 'Medium' && elapsedDays > 14) {
-          conditionMet = true;
-          warningLabel = "MEDIUM TOPIC ROT WARNING // NEGLECTED OVER 14 DAYS";
-        } else if (cp.confidence === 'Easy' && elapsedDays > 28) {
-          conditionMet = true;
-          warningLabel = "EASY TOPIC DECAY WARNING // NEGLECTED OVER 28 DAYS";
-        }
-
-        if (conditionMet) {
-          const exists = decayWarningsList.some(item => item.chapter === cp.chapter);
-          if (!exists) {
-            decayWarningsList.push({
-              chapter: cp.chapter,
-              subject: cp.subject,
-              days: elapsedDays,
-              confidence: cp.confidence,
-              label: warningLabel
-            });
-            urgentCount++;
-          }
-        }
-      });
-
-      document.getElementById('global-backlog-count').innerText = urgentCount;
-
-      if (decayWarningsList.length === 0) {
-        alertsFeed.innerHTML = `
-          <div class="flex items-center gap-2 p-3 bg-emerald-950/20 border border-emerald-500/20 rounded text-[10px] text-emerald-400 font-bold">
-            <i data-lucide="shield-check" class="w-4 h-4"></i>
-            <span>SYSTEM MONITOR STABLE // ALL TESTED & LEARNED TOPICS OPTIMIZED</span>
-          </div>
-        `;
-      } else {
-        decayWarningsList.sort((a, b) => b.days - a.days);
-        decayWarningsList.forEach(item => {
-          const warnCard = document.createElement('div');
-          const borderStyle = item.confidence === 'Critical' ? 'border-red-500 bg-red-950/20 text-red-200' : item.confidence === 'Hard' ? 'border-red-500/30 bg-red-950/10 text-red-300' : 'border-amber-500/30 bg-amber-950/10 text-amber-300';
-          warnCard.className = `p-2.5 border rounded flex justify-between items-center text-[10px] leading-tight font-bold ${borderStyle}`;
-          warnCard.innerHTML = `
-            <div class="truncate pr-2">
-              <span class="text-[8px] tracking-wider opacity-85 font-bold uppercase block text-xs">${item.label}</span>
-              <span class="block truncate font-bold text-zinc-200 mt-1" title="${item.chapter}">${item.chapter}</span>
-            </div>
-            <div class="shrink-0 text-right text-[9px] ml-2">
-              <span>Elapsed: ${item.days}d</span>
-              <span class="block text-[8px] text-cyan-400 opacity-80 mt-0.5">Status: ${item.confidence}</span>
-            </div>
-          `;
-          alertsFeed.appendChild(warnCard);
-        });
-      }
-
-      // Populate Checkpoint Ledger
-      const checkpointLedger = document.getElementById('checkpoint-ledger');
-      if (checkpoints.length === 0) {
-        checkpointLedger.innerHTML = '<p class="text-[10px] text-zinc-600 text-center py-12">No registered revision checkpoints found.</p>';
-      } else {
-        checkpointLedger.innerHTML = '';
-        checkpoints.forEach(cp => {
-          const cpDateStr = new Date(cp.date).toLocaleDateString();
-          const subBorder = cp.subject === "Mathematics" ? "border-l-cyan-500" : cp.subject === "Physics" ? "border-l-amber-500" : "border-l-emerald-500";
-          const diffBadge = cp.confidence === 'Easy' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : cp.confidence === 'Medium' ? 'text-amber-500 bg-amber-500/10 border-amber-500/20' : 'text-red-400 bg-red-500/10 border-red-500/20';
-
-          const card = document.createElement('div');
-          card.className = `p-2.5 bg-zinc-950 border border-zinc-800 rounded flex justify-between items-center border-l-2 ${subBorder} text-[10px]`;
-          card.innerHTML = `
-            <div class="min-w-0 flex-1 pr-2">
-              <span class="font-bold text-zinc-300 block truncate" title="${cp.chapter}">${cp.chapter}</span>
-              <span class="text-[8px] text-zinc-500 uppercase tracking-wider">${cp.subject} &bull; Checkpoint: ${cpDateStr}</span>
-            </div>
-            <div class="flex items-center gap-3">
-              <span class="text-[8px] px-1.5 py-0.5 rounded border ${diffBadge}">${cp.confidence}</span>
-              <button onclick="deleteCheckpointRecord('${cp.id}')" class="text-zinc-600 hover:text-red-400 p-1 transition" title="Delete checkpoint">
-                <i data-lucide="trash" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          `;
-          checkpointLedger.appendChild(card);
-        });
-      }
-
-      lucide.createIcons();
-    }
-
-    /* Notification Alerts */
-    function showToast(message, type = "cyan") {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-
-      const styleClasses = {
-        cyan: "bg-zinc-900 border-cyan-500/40 text-cyan-200",
-        emerald: "bg-zinc-900 border-emerald-500/40 text-emerald-200",
-        rose: "bg-zinc-900 border-red-500/40 text-red-200",
-        amber: "bg-zinc-900 border-amber-500/40 text-amber-200"
-      };
-
-      toast.className = `flex items-center justify-between gap-3 px-3 py-2.5 border rounded shadow-md pointer-events-auto transition-all duration-300 max-w-xs animate-slide-in ${styleClasses[type] || styleClasses.cyan}`;
-      toast.innerHTML = `
-        <span class="text-[10px] font-semibold leading-relaxed">${message}</span>
-        <button onclick="this.parentElement.remove()" class="text-zinc-500 hover:text-zinc-100 p-0.5">
-          <i data-lucide="x" class="w-3.5 h-3.5"></i>
-        </button>
-      `;
-
-      container.appendChild(toast);
-      lucide.createIcons();
-
-      setTimeout(() => {
-        toast.className += " opacity-0 translate-x-2";
-        setTimeout(() => toast.remove(), 300);
-      }, 4000);
-    }
-  </script>
-
-  <style>
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    .animate-slide-in {
-      animation: slideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-  </style>
+  <!-- Link to External JavaScript logic -->
+  <script src="script.js"></script>
 </body>
 </html>
